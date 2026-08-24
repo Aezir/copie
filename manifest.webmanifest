@@ -1,0 +1,17 @@
+{
+  "name": "Copie 复制箱",
+  "short_name": "Copie",
+  "description": "本地复制箱：存 baseurl/key、常用参数、人设、小剧场等经常要复制的内容。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
