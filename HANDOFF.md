@@ -12,7 +12,7 @@
 - 全局说明见 `~/.claude/CLAUDE.md`。
 
 ## 三、仓库与托管
-- **GitHub**：`Aezir/copie`（**私有**）。本项目就是仓库根目录（`copie/` 文件夹 = git 仓库根）。
+- **GitHub**：`Aezir/copie`（**公开**——为免费版 Netlify CI 放行而公开；代码无密钥，用户数据在另一个私有仓 `copie-data` 和本机浏览器里）。本项目就是仓库根目录（`copie/` 文件夹 = git 仓库根）。提交邮箱固定用 GitHub noreply（`109808984+Aezir@users.noreply.github.com`），别改回私人邮箱（历史已为隐私改写过一次）。
 - **本地路径**：`D:\Documents\DailyResearch\copie\`。**唯一源文件是 `index.html`**（旧的 copybox.html 已并入并删除）。
 - **线上**：https://copwe.netlify.app （Netlify）。
 - **部署方式**：已接**持续部署**——`git push` 到 main **自动上线**（Netlify 通过 deploy key 拉私有仓库 + GitHub webhook 触发）。也可手动 `netlify deploy --prod`（CLI 已登录，目录已关联站点；`.netlify/` 被 `.gitignore` 忽略）。
