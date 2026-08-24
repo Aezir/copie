@@ -177,6 +177,12 @@
   .menu-item .ic{width:20px; height:20px; color:var(--muted);}
   .menu-item .mt small{display:block; color:var(--faint); font-size:11.5px; margin-top:2px; letter-spacing:0;}
   .about{color:var(--faint); font-size:12.5px; line-height:1.9; padding:10px 8px;}
+  .sync-box{padding:2px 6px;}
+  .sync-box .field-in{margin-bottom:8px; font-size:13.5px;}
+  .sync-adv{display:flex; gap:8px;}
+  .sync-btns{display:flex; gap:8px; margin-top:2px;}
+  .sync-btns .btn{padding:9px;}
+  .sync-note{font-size:11.5px; color:var(--faint); line-height:1.7; padding:9px 2px 0;}
 
   .sheet-mask{position:absolute; inset:0; background:rgba(0,0,0,.34); z-index:30; display:none; align-items:center; justify-content:center; padding:24px 16px;}
   .sheet-mask.show{display:flex;}
@@ -258,6 +264,23 @@
       <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
       <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入<small>从 JSON 恢复，合并不覆盖</small></div></div>
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
+
+      <div class="sec-label">云同步（GitHub）</div>
+      <div class="sync-box">
+        <input class="field-in" id="syncRepo" placeholder="仓库：用户名/仓库名（私有）" autocomplete="off" spellcheck="false">
+        <input class="field-in" id="syncToken" type="password" placeholder="GitHub Token（Contents 读写）" autocomplete="off" spellcheck="false">
+        <div class="sync-adv">
+          <input class="field-in" id="syncPath" placeholder="文件名" autocomplete="off" spellcheck="false">
+          <input class="field-in" id="syncBranch" placeholder="分支" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="sync-btns">
+          <button class="btn ghost" id="syncSave">保存</button>
+          <button class="btn ghost" id="syncPull">下载</button>
+          <button class="btn primary" id="syncPush">上传</button>
+        </div>
+        <div class="sync-note" id="syncNote"></div>
+      </div>
+
       <div class="sec-label">关于</div>
       <div class="about" id="aboutBox"></div>
     </div>
@@ -324,6 +347,7 @@ function tx(m){return db.transaction(STORE,m).objectStore(STORE);}
 function getAll(){return new Promise((res,rej)=>{const r=tx('readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);});}
 function put(i){return new Promise((res,rej)=>{const r=tx('readwrite').put(i); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);});}
 function del(id){return new Promise((res,rej)=>{const r=tx('readwrite').delete(id); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);});}
+function clearStore(){return new Promise((res,rej)=>{const r=tx('readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);});}
 
 let entries=[], editingId=null, keyword='';
 let selectedTags=new Set(), sortMode='updated';
@@ -569,7 +593,7 @@ $('#tagApply').onclick=async()=>{
 };
 
 /* ---------- 设置页 ---------- */
-$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`Copie · 本地复制箱<br>共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。`; $('#settingsPage').classList.add('show'); };
+$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`Copie · 本地复制箱<br>共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。`; fillSyncForm(); $('#settingsPage').classList.add('show'); };
 $('#backBtn').onclick=()=>$('#settingsPage').classList.remove('show');
 $('#exportItem').onclick=()=>{
   const blob=new Blob([JSON.stringify({app:'copie',version:2,exportedAt:new Date().toISOString(),entries},null,2)],{type:'application/json'});
@@ -590,6 +614,60 @@ $('#fileInp').onchange=async e=>{
     render(); toast(`成功导入 ${c} 条`);
   }catch{ toast('导入失败：格式不对'); }
   e.target.value='';
+};
+
+/* ---------- 云同步（GitHub） ---------- */
+const SYNC_KEY='copie.sync';
+function loadSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(_){ return {}; } }
+function saveSyncCfg(c){ localStorage.setItem(SYNC_KEY, JSON.stringify(c)); }
+function readSyncForm(){ const prev=loadSync(); return {
+  repo:$('#syncRepo').value.trim(), token:$('#syncToken').value.trim(),
+  path:($('#syncPath').value.trim()||'copie-data.json'), branch:($('#syncBranch').value.trim()||'main'),
+  lastSync:prev.lastSync }; }
+function fillSyncForm(){ const c=loadSync();
+  $('#syncRepo').value=c.repo||''; $('#syncToken').value=c.token||'';
+  $('#syncPath').value=c.path||'copie-data.json'; $('#syncBranch').value=c.branch||'main'; updateSyncNote(); }
+function updateSyncNote(){ const c=loadSync();
+  $('#syncNote').innerHTML=(c.lastSync?`上次同步：${new Date(c.lastSync).toLocaleString()}<br>`:'')
+    +'⚠️ 数据含密钥，请务必用<b>私有仓库</b>。Token 只存本机浏览器，建议用 fine-grained token 仅授权该仓库的 Contents 读写。'; }
+function validSync(c){ if(!/^[^/\s]+\/[^/\s]+$/.test(c.repo)){ toast('仓库格式：用户名/仓库名'); return false; } if(!c.token){ toast('请填 Token'); return false; } return true; }
+function b64enc(str){ const bytes=new TextEncoder().encode(str); let bin=''; for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin); }
+function b64dec(b64){ const bin=atob(b64.replace(/\s/g,'')); return new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))); }
+function ghUrl(c){ const [owner,repo]=c.repo.split('/'); return `https://api.github.com/repos/${owner}/${repo}/contents/${c.path.split('/').map(encodeURIComponent).join('/')}`; }
+function ghHeaders(c){ return { 'Authorization':'Bearer '+c.token, 'Accept':'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+
+$('#syncSave').onclick=()=>{ const c=readSyncForm(); if(!validSync(c)) return; saveSyncCfg(c); updateSyncNote(); toast('配置已保存'); };
+
+$('#syncPush').onclick=async()=>{
+  const c=readSyncForm(); if(!validSync(c)) return; saveSyncCfg(c);
+  toast('上传中…');
+  try{
+    let sha; const g=await fetch(ghUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghHeaders(c)});
+    if(g.status===200) sha=(await g.json()).sha; else if(g.status===401) throw new Error('Token 无效或无权限'); else if(g.status!==404) throw new Error('读取失败 '+g.status);
+    const content=b64enc(JSON.stringify({app:'copie',version:2,exportedAt:new Date().toISOString(),entries},null,2));
+    const body={ message:'copie sync '+new Date().toISOString(), content, branch:c.branch }; if(sha) body.sha=sha;
+    const p=await fetch(ghUrl(c),{method:'PUT',headers:ghHeaders(c),body:JSON.stringify(body)});
+    if(!p.ok){ throw new Error('上传失败 '+p.status+'（检查仓库/分支/权限）'); }
+    const cc=loadSync(); cc.lastSync=now(); saveSyncCfg(cc); updateSyncNote(); toast('已上传到 GitHub');
+  }catch(err){ toast(String(err.message||err)); }
+};
+
+$('#syncPull').onclick=async()=>{
+  const c=readSyncForm(); if(!validSync(c)) return; saveSyncCfg(c);
+  toast('下载中…');
+  try{
+    const g=await fetch(ghUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghHeaders(c)});
+    if(g.status===404){ toast('云端还没有数据，请先上传'); return; }
+    if(g.status===401) throw new Error('Token 无效或无权限');
+    if(!g.ok) throw new Error('读取失败 '+g.status);
+    const j=await g.json(); const data=JSON.parse(b64dec(j.content));
+    const incoming=Array.isArray(data)?data:(data.entries||[]);
+    if(!confirm(`用云端 ${incoming.length} 条数据覆盖本机？本机现有数据会被替换（建议先在旧设备「上传」）。`)) return;
+    const remote=incoming.map(normalize);
+    await clearStore(); for(const e of remote) await put(e);
+    entries=remote; openSet.clear();
+    const cc=loadSync(); cc.lastSync=now(); saveSyncCfg(cc); updateSyncNote(); render(); toast(`已从 GitHub 下载 ${remote.length} 条`);
+  }catch(err){ toast(String(err.message||err)); }
 };
 
 /* ---------- 工具 ---------- */
