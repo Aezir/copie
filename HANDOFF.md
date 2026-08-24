@@ -14,12 +14,8 @@
 ## 三、仓库与托管
 - **GitHub**：`Aezir/copie`（**私有**）。本项目就是仓库根目录（`copie/` 文件夹 = git 仓库根）。
 - **本地路径**：`D:\Documents\DailyResearch\copie\`。**唯一源文件是 `index.html`**（旧的 copybox.html 已并入并删除）。
-- **线上**：https://copwe.netlify.app （Netlify，**手动 CLI 部署**）。
-- **部署方式**：`git push` **不会**自动上线。要更新线上，在已登录 netlify 的 cmd、`copie` 目录里跑：
-  ```
-  netlify deploy --prod
-  ```
-  （目录已通过 `.netlify/state.json` 关联到站点；`.netlify/` 被 `.gitignore` 忽略。）
+- **线上**：https://copwe.netlify.app （Netlify）。
+- **部署方式**：已接**持续部署**——`git push` 到 main **自动上线**（Netlify 通过 deploy key 拉私有仓库 + GitHub webhook 触发）。也可手动 `netlify deploy --prod`（CLI 已登录，目录已关联站点；`.netlify/` 被 `.gitignore` 忽略）。
 - **Netlify 徽标**（"Powered by Netlify"）：在 Netlify 面板 **Project configuration → General → Powered by Netlify badge** 关掉（按项目、免费版可关，无 CLI/toml 办法）。
 
 ## 四、技术栈 & 文件
@@ -73,6 +69,5 @@
 
 ## 十、待办 / 可选下一步
 - 关掉 Netlify 徽标（用户已知开关位置）。
-- 接 Netlify 持续部署（`git push` 自动上线），目前是手动 `netlify deploy --prod`。
 - 云同步可升级为**逐条合并**（每条带时间戳按条 PK），解决"两台离线各改会整份覆盖"的局限——用户暂用整份 LWW。
 - App 图标可再打磨。

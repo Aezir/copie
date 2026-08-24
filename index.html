@@ -336,7 +336,8 @@
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="sync-box">
-        <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（classic，勾 repo）" autocomplete="off" spellcheck="false">
+        <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
+        <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
         <div class="sync-btns">
           <button class="btn primary" id="syncConnect">连接并同步</button>
           <button class="btn ghost" id="syncClear">清除</button>
@@ -386,28 +387,29 @@
       </div>
       <div class="help-body">
         <h4>一句话</h4>
-        <p>上传"改完自动"，下载"打开自动"。连一次，以后不用管。</p>
+        <p>数据<b>加密后</b>才上云，云端只见密文。上传"改完自动"，下载"打开自动"。连一次，以后不用管。</p>
 
         <h4>① 怎么开（只需一次）</h4>
         <ol>
-          <li>生成 GitHub token：打开 <b>github.com/settings/tokens</b> → <b>Tokens (classic)</b> → Generate，<b>只勾 <code>repo</code></b>，复制 <code>ghp_…</code>（只显示一次）</li>
-          <li>把它粘到上面输入框 → 点<b>连接并同步</b></li>
-          <li>App 自动建一个<b>私有仓库</b> <code>copie-data</code> 存数据</li>
+          <li><b>先建仓库</b>：打开 <b>github.com/new</b>，仓库名填 <code>copie-data</code>，选 <b>Private（私有）</b>，创建（空的就行）</li>
+          <li><b>生成 token</b>：打开 <b>github.com/settings/tokens</b> → <b>Fine-grained tokens</b> → Generate，<b>Repository access</b> 选 <b>Only select repositories → copie-data</b>，<b>Permissions</b> 只给 <b>Contents: Read and write</b>，生成后复制</li>
+          <li>把 token 粘到上面第一个框，第二个框<b>设一个主密码</b>（加密用，你自己记住）→ 点<b>连接并同步</b></li>
         </ol>
 
         <h4>② 换设备</h4>
-        <p>新设备打开同一网址 → 云同步 → 填<b>同一个 token</b> → 连接并同步 → 数据自动拉过来。</p>
+        <p>新设备打开同一网址 → 云同步 → 填<b>同一个 token</b> + <b>同一个主密码</b> → 连接并同步 → 数据自动拉过来并解密。</p>
 
         <h4>③ 同步逻辑</h4>
         <ul>
+          <li><b>加密</b>：上云前用主密码把整份数据加密（AES-GCM），GitHub 上只存密文，拿到 token 或仓库也读不出内容</li>
           <li><b>上传</b>：加/改/删/置顶/收藏等任何改动，停手 1.5 秒后自动上传（整份数据）</li>
           <li><b>下载</b>：每次打开 App 自动拉云端最新</li>
           <li><b>谁新谁赢</b>：整份按"最后保存时间"比，新的覆盖旧的；<b>首次连接会合并</b>两端，不丢数据</li>
-          <li>token 只存<b>本机浏览器</b>，数据只在你的<b>私有仓库</b>，都不进代码</li>
+          <li>token 和主密码都只存<b>本机浏览器</b>，不进代码、不上云</li>
         </ul>
 
         <h4>注意</h4>
-        <div class="tip">• 要联网、在网址(https)下才通<br>• 别两台都离线各改一通再同步——后保存的会盖掉先保存的整份<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
+        <div class="tip">• <b>主密码丢了，云端数据永远解不开</b>——请务必记牢（本地 App 里的数据不受影响）<br>• token 只授权 copie-data 这一个仓，泄露了也碰不到你别的仓库；建议设过期、定期换<br>• 要联网、在网址(https)下才通<br>• 别两台都离线各改一通再同步——后保存的会盖掉先保存的整份<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
       </div>
     </div>
   </div>
@@ -771,14 +773,36 @@ const SYNC_KEY='copie.sync';
 let applyingRemote=false, syncing=false, autoPushTimer=null;
 function loadSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(_){ return {}; } }
 function saveSyncCfg(c){ localStorage.setItem(SYNC_KEY, JSON.stringify(c)); }
-function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; updateSyncNote(); }
+function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||''; updateSyncNote(); }
 function updateSyncNote(){ const c=loadSync(), el=$('#syncNote'); if(!el) return;
-  if(c.token){ el.innerHTML=`✅ 已连接${c.repo?`：<b>${esc(c.repo)}</b>`:''}${c.lastSync?` · 上次同步 ${new Date(c.lastSync).toLocaleString()}`:''}<br>改动后自动上传；换设备装好后填同一个 token 即可自动拉取。`; }
-  else{ el.innerHTML='填一个 GitHub token（<b>classic</b>，只勾 <b>repo</b>）即可。App 会自动建一个<b>私有</b>仓库 <code>copie-data</code> 存数据、自动同步。Token 只存本机浏览器，不进代码。'; }
+  if(c.token){ el.innerHTML=`✅ 已连接${c.repo?`：<b>${esc(c.repo)}</b>`:''}${c.lastSync?` · 上次同步 ${new Date(c.lastSync).toLocaleString()}`:''}<br>数据已<b>加密</b>后上传，云端只见密文。换设备填<b>同一个 token + 同一个主密码</b>即可自动拉取解密。`; }
+  else{ el.innerHTML='先在 GitHub 手动建一个<b>私有</b>仓库 <code>copie-data</code>，再生成 <b>fine-grained</b> token（只授权这一个仓库、Contents 读写），连同一个<b>主密码</b>一起填。数据会<b>加密</b>后才上云；Token 与主密码都<b>只存本机浏览器</b>，不进代码、不上云。'; }
 }
 function ghH(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
 function b64enc(str){ const b=new TextEncoder().encode(str); let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
 function b64dec(b64){ const bin=atob(b64.replace(/\s/g,'')); return new TextDecoder().decode(Uint8Array.from(bin,ch=>ch.charCodeAt(0))); }
+/* ---- 端到端加密：主密码派生密钥 + AES-GCM，上云前加密，云端只见密文 ---- */
+const ENC_ITER=210000;
+function u8ToB64(b){ let s=''; for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]); return btoa(s); }
+function b64ToU8(b64){ const bin=atob(b64.replace(/\s/g,'')); return Uint8Array.from(bin,ch=>ch.charCodeAt(0)); }
+function getPass(){ return loadSync().pass||''; }
+async function deriveKey(pass,salt){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:ENC_ITER,hash:'SHA-256'},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encEnvelope(obj,pass){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const data=new TextEncoder().encode(JSON.stringify(obj));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data));
+  return {enc:'aesgcm',kdf:{algo:'PBKDF2-SHA256',iter:ENC_ITER,salt:u8ToB64(salt)},iv:u8ToB64(iv),ct:u8ToB64(ct)};
+}
+async function decEnvelope(env,pass){
+  const key=await deriveKey(pass,b64ToU8(env.kdf.salt));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToU8(env.iv)},key,b64ToU8(env.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
 function contentsUrl(c){ return `https://api.github.com/repos/${c.repo}/contents/${c.path.split('/').map(encodeURIComponent).join('/')}`; }
 function mergeEntries(a,b){ const m=new Map(); a.forEach(e=>m.set(e.id,e));
   b.forEach(e=>{ const cur=m.get(e.id); if(!cur||(e.updatedAt||0)>=(cur.updatedAt||0)) m.set(e.id,e); }); return [...m.values()]; }
@@ -786,12 +810,20 @@ function mergeEntries(a,b){ const m=new Map(); a.forEach(e=>m.set(e.id,e));
 async function remotePull(c){
   const r=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c)});
   if(r.status===404) return null;
-  if(r.status===401) throw new Error('Token 无效（需 classic + repo 权限）');
+  if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
   if(!r.ok) throw new Error('读取失败 '+r.status);
-  const j=await r.json(); c._sha=j.sha; return JSON.parse(b64dec(j.content));
+  const j=await r.json(); c._sha=j.sha; const raw=JSON.parse(b64dec(j.content));
+  if(raw && raw.enc==='aesgcm'){
+    const pass=getPass(); if(!pass) throw new Error('需要主密码才能解密云端数据');
+    let inner; try{ inner=await decEnvelope(raw,pass); }catch(_){ throw new Error('主密码不对，无法解密云端数据'); }
+    return {savedAt:raw.savedAt||0, entries:inner.entries||[]};
+  }
+  return raw; // 兼容旧的明文数据（下次上传会自动转成密文）
 }
 async function remotePush(c){
-  const content=b64enc(JSON.stringify({app:'copie',version:2,savedAt:c.savedAt||now(),entries},null,2));
+  const pass=getPass(); if(!pass) throw new Error('缺少主密码，无法加密上传');
+  const env=await encEnvelope({entries},pass);
+  const content=b64enc(JSON.stringify({app:'copie',version:3,savedAt:c.savedAt||now(),...env},null,2));
   const attempt=sha=>{ const body={message:'copie '+new Date().toISOString(),content,branch:c.branch}; if(sha) body.sha=sha;
     return fetch(contentsUrl(c),{method:'PUT',headers:ghH(c),body:JSON.stringify(body)}); };
   let p=await attempt(c._sha);
@@ -804,9 +836,8 @@ async function applyRemoteEntries(arr){ applyingRemote=true; try{ await clearSto
 async function ensureRepo(c){
   const r=await fetch(`https://api.github.com/repos/${c.repo}`,{headers:ghH(c)});
   if(r.ok) return;
-  if(r.status===404){ const cr=await fetch('https://api.github.com/user/repos',{method:'POST',headers:ghH(c),
-      body:JSON.stringify({name:'copie-data',private:true,auto_init:true,description:'Copie 复制箱数据（自动同步）'})});
-    if(!cr.ok) throw new Error('建仓库失败 '+cr.status); await new Promise(res=>setTimeout(res,900)); return; }
+  if(r.status===404) throw new Error('没找到仓库 copie-data，请先在 GitHub 手动建一个空的私有仓库 copie-data');
+  if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
   throw new Error('检查仓库失败 '+r.status);
 }
 
@@ -814,7 +845,7 @@ async function syncNow(showToast){
   const c=loadSync(); if(!c.token||syncing) return; syncing=true;
   try{
     if(!c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
-      if(u.status===401) throw new Error('Token 无效（需 classic + repo 权限）'); if(!u.ok) throw new Error('连接失败 '+u.status);
+      if(u.status===401||u.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）'); if(!u.ok) throw new Error('连接失败 '+u.status);
       c.repo=(await u.json()).login+'/copie-data'; c.path='copie-data.json'; c.branch='main'; saveSyncCfg(c); await ensureRepo(c); }
     const remote=await remotePull(c);
     const rEntries=remote?(Array.isArray(remote)?remote:remote.entries||[]).map(normalize):null;
@@ -839,8 +870,9 @@ function touched(){ if(applyingRemote) return; const c=loadSync(); if(!c.token) 
     if(!cc.token||syncing) return; if(!cc.repo){ syncNow(false); return; }
     try{ await remotePush(cc); updateSyncNote(); }catch(e){ console.warn('autopush:',e); } },1500); }
 
-$('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); if(!tok){ toast('先粘贴 token'); return; }
-  const c=loadSync(); c.token=tok; saveSyncCfg(c); updateSyncNote(); toast('连接中…'); await syncNow(true); fillSyncForm(); };
+$('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); const pass=$('#syncPass').value;
+  if(!tok){ toast('先粘贴 token'); return; } if(!pass){ toast('先设置主密码'); return; }
+  const c=loadSync(); c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); toast('连接中…'); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
 $('#syncHelp').onclick=()=>$('#helpMask').classList.add('show');
 $('#helpClose').onclick=()=>$('#helpMask').classList.remove('show');
