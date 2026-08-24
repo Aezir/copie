@@ -15,30 +15,40 @@
 <title>Copie</title>
 <style>
   :root{
+    --accent:#2383e2;
     --bg:#ffffff; --text:#37352f; --muted:rgba(55,53,47,.5); --faint:rgba(55,53,47,.34);
     --hover:rgba(55,53,47,.05); --hover2:rgba(55,53,47,.11); --divider:rgba(55,53,47,.08);
-    --field:rgba(55,53,47,.045); --accent:#2383e2; --danger:#e03e3e; --ok:#0f9d58; --fav:#eaa100; --pin:#5b6b8c;
+    --field:rgba(55,53,47,.045); --danger:#e03e3e; --ok:#0f9d58; --fav:#eaa100; --pin:#5b6b8c;
     --sheet:#ffffff; --shadow:0 14px 44px rgba(0,0,0,.14), 0 0 1px rgba(0,0,0,.12);
+    --appbg:#e9e9e7;
   }
+  /* 深色调色板抽成一份，@media（跟随系统）和 [data-theme=dark]（手动挡）共用 */
   @media (prefers-color-scheme:dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#191919; --text:rgba(255,255,255,.82); --muted:rgba(255,255,255,.45); --faint:rgba(255,255,255,.3);
       --hover:rgba(255,255,255,.055); --hover2:rgba(255,255,255,.13); --divider:rgba(255,255,255,.08);
-      --field:rgba(255,255,255,.055); --accent:#529cca; --danger:#ff7369; --ok:#4dab6d; --fav:#e7b23c; --pin:#8ea2c9;
+      --field:rgba(255,255,255,.055); --danger:#ff7369; --ok:#4dab6d; --fav:#e7b23c; --pin:#8ea2c9;
       --sheet:#252525; --shadow:0 14px 44px rgba(0,0,0,.55), 0 0 1px rgba(255,255,255,.1);
+      --appbg:#111;
     }
+  }
+  :root[data-theme="dark"]{
+    --bg:#191919; --text:rgba(255,255,255,.82); --muted:rgba(255,255,255,.45); --faint:rgba(255,255,255,.3);
+    --hover:rgba(255,255,255,.055); --hover2:rgba(255,255,255,.13); --divider:rgba(255,255,255,.08);
+    --field:rgba(255,255,255,.055); --danger:#ff7369; --ok:#4dab6d; --fav:#e7b23c; --pin:#8ea2c9;
+    --sheet:#252525; --shadow:0 14px 44px rgba(0,0,0,.55), 0 0 1px rgba(255,255,255,.1);
+    --appbg:#111;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
-    margin:0; background:#e9e9e7; color:var(--text);
+    margin:0; background:var(--appbg); color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Variable","Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     text-rendering:optimizeLegibility; font-feature-settings:"kern","liga","calt";
     letter-spacing:-.006em; font-size:15px; line-height:1.5;
     display:flex; align-items:stretch; justify-content:center; min-height:100dvh;
   }
-  @media (prefers-color-scheme:dark){ body{background:#111;} }
 
   /* 自适应：手机满屏；桌面/宽屏居中成一列 */
   #phone{width:100%; max-width:480px; height:100dvh; background:var(--bg); position:relative; overflow:hidden; display:flex; flex-direction:column;}
@@ -111,12 +121,17 @@
   .tag.c6{background:#eae4f2;color:#6b4a8a;} .tag.c7{background:#f5e0ec;color:#94436e;}
   .tag.c8{background:#fbe4e4;color:#a3403a;}
   @media (prefers-color-scheme:dark){
-    .tag.c0{background:#454440;color:#cbcac6;} .tag.c1{background:#4a3c34;color:#dcbfad;}
-    .tag.c2{background:#4d3a28;color:#f0c193;} .tag.c3{background:#4a4127;color:#e6d78f;}
-    .tag.c4{background:#2f4a3c;color:#a2d4b4;} .tag.c5{background:#2c4657;color:#a0cadf;}
-    .tag.c6{background:#3f3350;color:#c6ade3;} .tag.c7{background:#4b2f40;color:#ecacce;}
-    .tag.c8{background:#4d2f2c;color:#eda6a1;}
+    :root:not([data-theme="light"]) .tag.c0{background:#454440;color:#cbcac6;} :root:not([data-theme="light"]) .tag.c1{background:#4a3c34;color:#dcbfad;}
+    :root:not([data-theme="light"]) .tag.c2{background:#4d3a28;color:#f0c193;} :root:not([data-theme="light"]) .tag.c3{background:#4a4127;color:#e6d78f;}
+    :root:not([data-theme="light"]) .tag.c4{background:#2f4a3c;color:#a2d4b4;} :root:not([data-theme="light"]) .tag.c5{background:#2c4657;color:#a0cadf;}
+    :root:not([data-theme="light"]) .tag.c6{background:#3f3350;color:#c6ade3;} :root:not([data-theme="light"]) .tag.c7{background:#4b2f40;color:#ecacce;}
+    :root:not([data-theme="light"]) .tag.c8{background:#4d2f2c;color:#eda6a1;}
   }
+  [data-theme="dark"] .tag.c0{background:#454440;color:#cbcac6;} [data-theme="dark"] .tag.c1{background:#4a3c34;color:#dcbfad;}
+  [data-theme="dark"] .tag.c2{background:#4d3a28;color:#f0c193;} [data-theme="dark"] .tag.c3{background:#4a4127;color:#e6d78f;}
+  [data-theme="dark"] .tag.c4{background:#2f4a3c;color:#a2d4b4;} [data-theme="dark"] .tag.c5{background:#2c4657;color:#a0cadf;}
+  [data-theme="dark"] .tag.c6{background:#3f3350;color:#c6ade3;} [data-theme="dark"] .tag.c7{background:#4b2f40;color:#ecacce;}
+  [data-theme="dark"] .tag.c8{background:#4d2f2c;color:#eda6a1;}
 
   .item-body{display:none; padding:1px 6px 6px 25px;}
   .item.open .item-body{display:block;}
@@ -183,6 +198,40 @@
   .sync-btns{display:flex; gap:8px; margin-top:2px;}
   .sync-btns .btn{padding:9px;}
   .sync-note{font-size:11.5px; color:var(--faint); line-height:1.7; padding:9px 2px 0;}
+  .sync-hd{display:flex; align-items:center; gap:5px;}
+  .help-btn{border:none; background:transparent; color:var(--faint); cursor:pointer; width:20px; height:20px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%;}
+  .help-btn .ic{width:16px; height:16px;}
+  .help-btn:hover{color:var(--accent); background:var(--hover);}
+  .help-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .help-head h2{margin:0; font-size:16px; font-weight:600; color:var(--text);}
+  .help-body{font-size:13.5px; line-height:1.75; color:var(--text);}
+  .help-body h4{font-size:13.5px; font-weight:700; margin:15px 0 4px; color:var(--text);}
+  .help-body h4:first-child{margin-top:2px;}
+  .help-body p{margin:4px 0; color:var(--muted);}
+  .help-body ol,.help-body ul{margin:4px 0; padding-left:19px; color:var(--muted);}
+  .help-body li{margin:3px 0;}
+  .help-body b{color:var(--text);}
+  .help-body code{background:var(--field); padding:1px 5px; border-radius:4px; font-size:12px;}
+  .help-body .tip{background:var(--field); border-radius:8px; padding:9px 11px; margin-top:8px; color:var(--muted); font-size:12.5px; line-height:1.9;}
+
+  /* 主题设置区 */
+  .set-card{background:var(--field); border-radius:10px; padding:4px 4px; margin:2px 6px 6px;}
+  .set-row{display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:8px;}
+  .set-row + .set-row{border-top:1px solid var(--divider);}
+  .set-row .rt{flex:1; min-width:0;}
+  .set-row .rt .rt-main{font-size:14px; color:var(--text);}
+  .set-row .rt .rt-sub{font-size:11.5px; color:var(--faint); margin-top:2px; line-height:1.5;}
+  .seg-pill{display:flex; gap:2px; background:var(--hover); border-radius:8px; padding:2px; flex:none;}
+  .seg-pill button{border:none; background:transparent; color:var(--muted); font-size:12.5px; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:inherit; white-space:nowrap;}
+  .seg-pill button.on{background:var(--sheet); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1);}
+  .swatches{display:flex; flex-wrap:wrap; gap:12px; flex:none; padding:2px 0; justify-content:flex-end; max-width:62%;}
+  .swatch{width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; padding:0; position:relative; display:flex; align-items:center; justify-content:center;}
+  .swatch::after{content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid transparent;}
+  .swatch.on::after{border-color:currentColor;}
+  .swatch .ic{width:15px; height:15px; color:#fff; opacity:0;}
+  .swatch.on .ic{opacity:1;}
+  .swatch-bg{box-shadow:inset 0 0 0 1px var(--divider);}
+  .swatch-bg .ic{display:none;}
 
   .sheet-mask{position:absolute; inset:0; background:rgba(0,0,0,.34); z-index:30; display:none; align-items:center; justify-content:center; padding:24px 16px;}
   .sheet-mask.show{display:flex;}
@@ -260,12 +309,32 @@
       <h2>设置</h2>
     </div>
     <div class="page-body">
+      <div class="sec-label">主题</div>
+      <div class="set-card">
+        <div class="set-row">
+          <div class="rt"><div class="rt-main">外观</div><div class="rt-sub">日间 / 夜间 / 跟随系统</div></div>
+          <div class="seg-pill" id="themeSeg">
+            <button data-theme-mode="auto">跟随系统</button>
+            <button data-theme-mode="light">日间</button>
+            <button data-theme-mode="dark">夜间</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="rt"><div class="rt-main">主题色</div><div class="rt-sub">强调色、按钮、选中态</div></div>
+          <div class="swatches" id="accentSwatches"></div>
+        </div>
+        <div class="set-row">
+          <div class="rt"><div class="rt-main">背景色</div><div class="rt-sub">页面底色</div></div>
+          <div class="swatches" id="bgSwatches"></div>
+        </div>
+      </div>
+
       <div class="sec-label">数据</div>
       <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
       <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入<small>从 JSON 恢复，合并不覆盖</small></div></div>
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
 
-      <div class="sec-label">云同步</div>
+      <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="sync-box">
         <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（classic，勾 repo）" autocomplete="off" spellcheck="false">
         <div class="sync-btns">
@@ -305,6 +374,40 @@
       <div class="sheet-btns">
         <button class="btn ghost" id="tagCancel">取消</button>
         <button class="btn primary" id="tagApply">应用到所选</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-mask" id="helpMask">
+    <div class="sheet">
+      <div class="help-head">
+        <h2>云同步 · 教程 &amp; 原理</h2>
+        <button class="ghost-ico" id="helpClose" aria-label="关闭"><svg class="ic" viewBox="0 0 24 24"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/></svg></button>
+      </div>
+      <div class="help-body">
+        <h4>一句话</h4>
+        <p>上传"改完自动"，下载"打开自动"。连一次，以后不用管。</p>
+
+        <h4>① 怎么开（只需一次）</h4>
+        <ol>
+          <li>生成 GitHub token：打开 <b>github.com/settings/tokens</b> → <b>Tokens (classic)</b> → Generate，<b>只勾 <code>repo</code></b>，复制 <code>ghp_…</code>（只显示一次）</li>
+          <li>把它粘到上面输入框 → 点<b>连接并同步</b></li>
+          <li>App 自动建一个<b>私有仓库</b> <code>copie-data</code> 存数据</li>
+        </ol>
+
+        <h4>② 换设备</h4>
+        <p>新设备打开同一网址 → 云同步 → 填<b>同一个 token</b> → 连接并同步 → 数据自动拉过来。</p>
+
+        <h4>③ 同步逻辑</h4>
+        <ul>
+          <li><b>上传</b>：加/改/删/置顶/收藏等任何改动，停手 1.5 秒后自动上传（整份数据）</li>
+          <li><b>下载</b>：每次打开 App 自动拉云端最新</li>
+          <li><b>谁新谁赢</b>：整份按"最后保存时间"比，新的覆盖旧的；<b>首次连接会合并</b>两端，不丢数据</li>
+          <li>token 只存<b>本机浏览器</b>，数据只在你的<b>私有仓库</b>，都不进代码</li>
+        </ul>
+
+        <h4>注意</h4>
+        <div class="tip">• 要联网、在网址(https)下才通<br>• 别两台都离线各改一通再同步——后保存的会盖掉先保存的整份<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
       </div>
     </div>
   </div>
@@ -352,6 +455,53 @@ const uid=()=>'e_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)
 const now=()=>Date.now();
 const openSet=new Set();
 const findEnt=id=>entries.find(x=>x.id===id);
+
+/* ---------- 主题（深浅模式 + 主题色） ---------- */
+const THEME_KEY='copie.theme';
+const ACCENTS=[
+  {id:'blue',   light:'#2383e2', dark:'#529cca'},
+  {id:'green',  light:'#0f9d58', dark:'#4dab6d'},
+  {id:'orange', light:'#d9730d', dark:'#e9973f'},
+  {id:'red',    light:'#e03e3e', dark:'#ff7369'},
+  {id:'purple', light:'#9065b0', dark:'#b087d6'},
+  {id:'pink',   light:'#c14c8a', dark:'#e07aae'},
+  {id:'gray',   light:'#5b6b8c', dark:'#8ea2c9'},
+];
+const BGS=[
+  {id:'default', light:'#ffffff', dark:'#191919'},
+  {id:'paper',   light:'#faf9f6', dark:'#1e1e1c'},
+  {id:'sand',    light:'#faf6ef', dark:'#221f1b'},
+  {id:'mint',    light:'#f2f7f3', dark:'#1a201c'},
+  {id:'sky',     light:'#f1f6fa', dark:'#191d21'},
+  {id:'lilac',   light:'#f6f4fa', dark:'#1e1b22'},
+  {id:'rose',    light:'#fbf4f6', dark:'#211a1d'},
+];
+function loadTheme(){ try{ return JSON.parse(localStorage.getItem(THEME_KEY))||{}; }catch(_){ return {}; } }
+function saveTheme(t){ localStorage.setItem(THEME_KEY, JSON.stringify(t)); }
+function prefersDark(){ return matchMedia('(prefers-color-scheme:dark)').matches; }
+function effectiveDark(t){ return t.mode==='dark' || (t.mode!=='light' && (t.mode==='auto'||!t.mode) && prefersDark()); }
+function applyTheme(){
+  const t=loadTheme(), root=document.documentElement;
+  if(t.mode==='light'||t.mode==='dark') root.setAttribute('data-theme',t.mode); else root.removeAttribute('data-theme');
+  const dark=effectiveDark(t);
+  const a=ACCENTS.find(x=>x.id===t.accent)||ACCENTS[0];
+  root.style.setProperty('--accent', dark?a.dark:a.light);
+  const bg=BGS.find(x=>x.id===t.bg&&x.id!=='default');
+  if(bg) root.style.setProperty('--bg', dark?bg.dark:bg.light); else root.style.removeProperty('--bg');
+  const meta=document.querySelector('meta[name="theme-color"]:not([media])')||(()=>{ const m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); return m; })();
+  meta.setAttribute('content', bg?(dark?bg.dark:bg.light):(dark?'#191919':'#ffffff'));
+}
+applyTheme();
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{ const t=loadTheme(); if(t.mode==='light'||t.mode==='dark') return; applyTheme(); buildThemeUI(); });
+function buildThemeUI(){
+  const t=loadTheme(), mode=t.mode||'auto', acc=t.accent||'blue';
+  const seg=$('#themeSeg'); if(seg) seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.themeMode===mode));
+  const box=$('#accentSwatches'); if(box) box.innerHTML=ACCENTS.map(a=>
+    `<button class="swatch${a.id===acc?' on':''}" data-accent="${a.id}" style="background:${effectiveDark(t)?a.dark:a.light}" title="${a.id}">${ic('checkOn')}</button>`).join('');
+  const bg=t.bg||'default';
+  const bgBox=$('#bgSwatches'); if(bgBox) bgBox.innerHTML=BGS.map(g=>
+    `<button class="swatch swatch-bg${g.id===bg?' on':''}" data-bg="${g.id}" style="background:${effectiveDark(t)?g.dark:g.light}" title="${g.id}">${ic('checkOn')}</button>`).join('');
+}
 
 function normalize(raw){
   let blocks;
@@ -587,7 +737,13 @@ $('#tagApply').onclick=async()=>{
 };
 
 /* ---------- 设置页 ---------- */
-$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`Copie · 本地复制箱<br>共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。`; fillSyncForm(); $('#settingsPage').classList.add('show'); };
+$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`Copie · 本地复制箱<br>共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。`; fillSyncForm(); buildThemeUI(); $('#settingsPage').classList.add('show'); };
+$('#themeSeg').addEventListener('click',e=>{ const b=e.target.closest('[data-theme-mode]'); if(!b) return;
+  const t=loadTheme(); t.mode=b.dataset.themeMode; saveTheme(t); applyTheme(); buildThemeUI(); });
+$('#accentSwatches').addEventListener('click',e=>{ const b=e.target.closest('[data-accent]'); if(!b) return;
+  const t=loadTheme(); t.accent=b.dataset.accent; saveTheme(t); applyTheme(); buildThemeUI(); });
+$('#bgSwatches').addEventListener('click',e=>{ const b=e.target.closest('[data-bg]'); if(!b) return;
+  const t=loadTheme(); t.bg=b.dataset.bg; saveTheme(t); applyTheme(); buildThemeUI(); });
 $('#backBtn').onclick=()=>$('#settingsPage').classList.remove('show');
 $('#exportItem').onclick=()=>{
   const blob=new Blob([JSON.stringify({app:'copie',version:2,exportedAt:new Date().toISOString(),entries},null,2)],{type:'application/json'});
@@ -686,6 +842,9 @@ function touched(){ if(applyingRemote) return; const c=loadSync(); if(!c.token) 
 $('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); if(!tok){ toast('先粘贴 token'); return; }
   const c=loadSync(); c.token=tok; saveSyncCfg(c); updateSyncNote(); toast('连接中…'); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
+$('#syncHelp').onclick=()=>$('#helpMask').classList.add('show');
+$('#helpClose').onclick=()=>$('#helpMask').classList.remove('show');
+$('#helpMask').addEventListener('click',e=>{ if(e.target.id==='helpMask') e.currentTarget.classList.remove('show'); });
 
 /* ---------- 工具 ---------- */
 async function copyText(str){
