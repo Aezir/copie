@@ -15,7 +15,7 @@
 <title>Copie</title>
 <style>
   :root{
-    --accent:#e8578a;
+    --accent:#ff9292;
     --bg:#ffffff; --text:#37352f; --muted:rgba(55,53,47,.5); --faint:rgba(55,53,47,.34);
     --hover:rgba(55,53,47,.05); --hover2:rgba(55,53,47,.11); --divider:rgba(55,53,47,.08);
     --field:rgba(55,53,47,.045); --danger:#e03e3e; --ok:#0f9d58; --fav:#eaa100; --pin:#5b6b8c;
@@ -425,6 +425,7 @@
       <div class="sec-label">显示</div>
       <div class="bubble-card">
         <div class="bubble-row"><span>代码高亮（编辑时）</span><label class="switch"><input type="checkbox" id="hlToggle"><span class="track"></span></label></div>
+        <div class="bubble-row"><span>隐私模式（子条目打码，只留首尾4字）</span><label class="switch"><input type="checkbox" id="privToggle"><span class="track"></span></label></div>
       </div>
       <div class="sec-label">标题栏显示</div>
       <div class="bubble-card">
@@ -543,7 +544,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='0.7';
+const APP_VERSION='0.8';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -568,7 +569,7 @@ const findEnt=id=>entries.find(x=>x.id===id);
 /* ---------- 主题（深浅模式 + 主题色） ---------- */
 const THEME_KEY='copie.theme';
 const ACCENTS=[
-  {id:'rose',   light:'#e8578a', dark:'#ef79a3'},
+  {id:'rose',   light:'#ff9292', dark:'#ffa8a8'},
   {id:'blue',   light:'#2383e2', dark:'#529cca'},
   {id:'green',  light:'#0f9d58', dark:'#4dab6d'},
   {id:'orange', light:'#d9730d', dark:'#e9973f'},
@@ -738,6 +739,10 @@ function loadMeta(){ try{ return Object.assign({date:true,time:false,words:false
 function saveMeta(m){ localStorage.setItem(META_KEY, JSON.stringify(m)); }
 function loadHl(){ try{ const v=localStorage.getItem(HL_KEY); return v===null?true:v==='1'; }catch(_){ return true; } }
 function saveHl(v){ localStorage.setItem(HL_KEY, v?'1':'0'); }
+const PRIV_KEY='copie.privacy';
+function loadPrivacy(){ try{ return localStorage.getItem(PRIV_KEY)==='1'; }catch(_){ return false; } }
+function savePrivacy(v){ localStorage.setItem(PRIV_KEY, v?'1':'0'); }
+function maskText(s){ const a=Array.from(String(s)); if(a.length<=8) return s; return a.slice(0,4).join('')+'••••'+a.slice(-4).join(''); }
 function fmtTime(ts){ if(!ts) return ''; const d=new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
 function entryStats(e){ const arr=Array.from((e.blocks||[]).join('\n')); let cjk=0;
   for(const ch of arr){ const c=ch.codePointAt(0); if((c>=0x3040&&c<=0x9FFF)||(c>=0xF900&&c<=0xFAFF)||(c>=0x20000&&c<=0x2FA1F)) cjk++; }
@@ -763,10 +768,11 @@ function initCodeWrap(cw){ const ta=cw.querySelector('.blk-value'), pre=cw.query
 function applyHl(){ render(); } // 高亮在“展示态”渲染，切换即重绘
 function buildDisplayUI(){ const m=loadMeta();
   const set=(id,v)=>{ const el=$('#'+id); if(el) el.checked=v; };
-  set('metaDate',m.date); set('metaTime',m.time); set('metaWords',m.words); set('metaTokens',m.tokens); set('hlToggle',loadHl());
+  set('metaDate',m.date); set('metaTime',m.time); set('metaWords',m.words); set('metaTokens',m.tokens); set('hlToggle',loadHl()); set('privToggle',loadPrivacy());
   const bindMeta=(id,key)=>{ const el=$('#'+id); if(el) el.onchange=ev=>{ const mm=loadMeta(); mm[key]=ev.target.checked; saveMeta(mm); render(); }; };
   bindMeta('metaDate','date'); bindMeta('metaTime','time'); bindMeta('metaWords','words'); bindMeta('metaTokens','tokens');
-  const hl=$('#hlToggle'); if(hl) hl.onchange=ev=>{ saveHl(ev.target.checked); applyHl(); }; }
+  const hl=$('#hlToggle'); if(hl) hl.onchange=ev=>{ saveHl(ev.target.checked); applyHl(); };
+  const pv=$('#privToggle'); if(pv) pv.onchange=ev=>{ savePrivacy(ev.target.checked); render(); }; }
 function allOpen(){ return lastRendered.length>0 && lastRendered.every(id=>openSet.has(id)); }
 function refreshExpandIcon(){ $('#expandBtn').innerHTML=ic(allOpen()?'contract':'expand'); }
 
@@ -782,13 +788,13 @@ function render(){
   else data.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
   data.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)); // 置顶的排最前（稳定排序保留原顺序）
 
-  lastRendered=data.map(e=>e.id); openSwipe=null; const HLon=loadHl();
+  lastRendered=data.map(e=>e.id); openSwipe=null; const HLon=loadHl(), PRIV=loadPrivacy();
   if(!data.length){ list.innerHTML=`<div class="empty">${(kw||selectedTags.size)?'没找到匹配的记录':'还没有记录<br>点右上角 + 添加第一条'}</div>`; refreshExpandIcon(); return; }
   list.innerHTML=data.map((e,di)=>{
     const blocks=(e.blocks||[]).map((b,i)=>{
       const exp=b.length>160?`<button class="rowcopy" data-expand="${e.id}_${i}" title="展开">${ic('expand')}</button>`:'';
       return `<div class="blk"><div class="swipe-actions"><button class="sw-act sw-del" data-delblock data-eid="${e.id}" data-bi="${i}" title="删除此块">${ic('del')}</button></div><div class="row">
-        <div class="cell block-text${HLon?' hl':''}" contenteditable="true" id="b_${e.id}_${i}" data-eid="${e.id}" data-bi="${i}" data-k="block">${HLon?hlCode(b):esc(b)}</div>
+        <div class="cell block-text${PRIV?' priv':(HLon?' hl':'')}" contenteditable="true" id="b_${e.id}_${i}" data-eid="${e.id}" data-bi="${i}" data-k="block">${PRIV?esc(maskText(b)):(HLon?hlCode(b):esc(b))}</div>
         <div class="row-actions"><button class="rowcopy" data-copy-el="b_${e.id}_${i}" title="复制">${ic('copy')}</button>${exp}</div>
       </div></div>`;
     }).join('');
@@ -890,7 +896,8 @@ $('#list').addEventListener('click',async e=>{
   if(favBtn){ const ent=findEnt(favBtn.dataset.fav); ent.fav=!ent.fav; await put(ent); closeSwipe(); render(); toast(ent.fav?'已收藏':'已取消收藏'); return; }
   const swdel=t.closest('[data-swdel]');
   if(swdel){ const id=swdel.dataset.swdel; const ent=findEnt(id);
-    if(ent){ const restore={...ent}; await del(id); entries=entries.filter(x=>x.id!==id); openSet.delete(id); openSwipe=null; render(); showUndoBar(restore); }
+    if(ent){ const restore={...ent}; await del(id); entries=entries.filter(x=>x.id!==id); openSet.delete(id); openSwipe=null; render();
+      showUndoBar(`已删除「${restore.title||'未命名'}」`, async()=>{ await put(restore); if(!findEnt(restore.id)) entries.push(restore); }); }
     return; }
   const w=t.closest('.item-wrap');
   if(w && w.classList.contains('open') && !t.closest('.swipe-actions')){ w.classList.remove('open'); openSwipe=null; return; }
@@ -906,14 +913,16 @@ $('#list').addEventListener('click',async e=>{
     item.classList.toggle('open'); item.classList.contains('open')?openSet.add(id):openSet.delete(id); refreshExpandIcon(); return; }
   const copyBtn=t.closest('[data-copy-el]');
   if(copyBtn){ const el=document.getElementById(copyBtn.dataset.copyEl);
-    await copyText(el?el.innerText.replace(/\n$/,''):'');
+    let txt=''; if(el){ const ent2=findEnt(el.dataset.eid); txt = (ent2 && ent2.blocks[+el.dataset.bi]!==undefined) ? ent2.blocks[+el.dataset.bi] : el.innerText.replace(/\n$/,''); }
+    await copyText(txt);
     copyBtn.classList.add('copied'); const o=copyBtn.innerHTML; copyBtn.textContent='已复制';
     setTimeout(()=>{copyBtn.classList.remove('copied'); copyBtn.innerHTML=o;},1000); return; }
   const exp=t.closest('[data-expand]');
   if(exp){ const el=$('#b_'+exp.dataset.expand); const on=el.classList.toggle('expanded');
     exp.innerHTML=ic(on?'contract':'expand'); exp.title=on?'收起':'展开'; return; }
   const dblk=t.closest('[data-delblock]');
-  if(dblk){ const ent=findEnt(dblk.dataset.eid); ent.blocks.splice(+dblk.dataset.bi,1); openBlk=null; await put(ent); render(); return; }
+  if(dblk){ const ent=findEnt(dblk.dataset.eid); const bi=+dblk.dataset.bi; const val=ent.blocks[bi]; ent.blocks.splice(bi,1); openBlk=null; await put(ent); render();
+    showUndoBar('已删除一个文本块', async()=>{ ent.blocks.splice(bi,0,val); await put(ent); }); return; }
   const addB=t.closest('[data-addblock]');
   if(addB){ const ent=findEnt(addB.dataset.addblock); ent.blocks.push(''); await put(ent); render();
     const els=document.querySelectorAll(`[data-eid="${ent.id}"][data-k="block"]`); const last=els[els.length-1]; if(last) last.focus(); return; }
@@ -923,13 +932,14 @@ $('#list').addEventListener('click',async e=>{
 /* 就地编辑：失焦即存 */
 $('#list').addEventListener('focusin',e=>{ const el=e.target; if(!el.dataset||el.dataset.k!=='block') return;
   const ent=findEnt(el.dataset.eid); if(!ent) return; const bi=+el.dataset.bi;
-  if(el.classList.contains('hl')&&ent.blocks[bi]!==undefined) el.textContent=ent.blocks[bi]; }); // 聚焦转纯文本，中文输入法安全
+  if((el.classList.contains('hl')||el.classList.contains('priv'))&&ent.blocks[bi]!==undefined) el.textContent=ent.blocks[bi]; }); // 聚焦显真·纯文本，中文输入法安全
 $('#list').addEventListener('focusout',async e=>{
   const el=e.target; if(!el.dataset||el.dataset.k!=='block') return;
   const ent=findEnt(el.dataset.eid); if(!ent) return;
   const bi=+el.dataset.bi; if(ent.blocks[bi]===undefined) return;
   ent.blocks[bi]=el.innerText.replace(/\n$/,''); await put(ent);
-  if(el.classList.contains('hl')) el.innerHTML=hlCode(ent.blocks[bi]); // 失焦重新着色
+  if(el.classList.contains('priv')) el.innerHTML=esc(maskText(ent.blocks[bi])); // 失焦重新打码
+  else if(el.classList.contains('hl')) el.innerHTML=hlCode(ent.blocks[bi]); // 失焦重新着色
 });
 $('#list').addEventListener('keydown',e=>{ if(e.key==='Escape'&&e.target.dataset&&e.target.dataset.k==='block'){ e.target.blur(); } });
 /* 点空白区域即退出子条目编辑（contenteditable 不会自动失焦） */
@@ -1005,9 +1015,10 @@ $('#selbar').addEventListener('click',async e=>{
   else if('selcancel' in b.dataset){ setSelMode(false); }
   else if('seltag' in b.dataset){ if(!selectedIds.size){ toast('先选几条'); return; } $('#batchTags').value=''; setTagMode('add'); $('#tagMask').classList.add('show'); }
   else if('seldel' in b.dataset){ if(!selectedIds.size){ toast('先选几条'); return; }
-    if(confirm(`删除选中的 ${selectedIds.size} 条？不可撤销`)){ const n=selectedIds.size;
-      for(const id of selectedIds) await del(id);
-      entries=entries.filter(x=>!selectedIds.has(x.id)); setSelMode(false); toast(`已删除 ${n} 条`); } }
+    const dels=entries.filter(x=>selectedIds.has(x.id)).map(x=>({...x})); const n=dels.length;
+    for(const id of selectedIds) await del(id);
+    entries=entries.filter(x=>!selectedIds.has(x.id)); setSelMode(false); render();
+    showUndoBar(`已删除 ${n} 条`, async()=>{ for(const e of dels){ await put(e); if(!findEnt(e.id)) entries.push(e); } }); }
 });
 
 /* ---------- 批量改标签 ---------- */
@@ -1178,14 +1189,14 @@ async function copyText(str){
 let toastTimer; function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1500);}
 let undoTimer, pendingUndo=null;
-function showUndoBar(ent){ pendingUndo=ent;
-  $('#undoBarText').textContent=`已删除「${ent.title||'未命名'}」`;
+/* 通用撤回条：任何删除都传入 文案 + 恢复函数 */
+function showUndoBar(text, undoFn){ pendingUndo=undoFn;
+  $('#undoBarText').textContent=text;
   $('#undoBar').classList.add('show');
   clearTimeout(undoTimer); undoTimer=setTimeout(()=>{ $('#undoBar').classList.remove('show'); pendingUndo=null; },4000); }
 $('#undoBarBtn').onclick=async()=>{ if(!pendingUndo) return;
-  const ent=pendingUndo; pendingUndo=null; clearTimeout(undoTimer);
-  await put(ent); if(!findEnt(ent.id)) entries.push(ent);
-  $('#undoBar').classList.remove('show'); render(); toast('已恢复'); };
+  const fn=pendingUndo; pendingUndo=null; clearTimeout(undoTimer);
+  await fn(); $('#undoBar').classList.remove('show'); render(); toast('已恢复'); };
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;}
 $('#searchInp').addEventListener('input',e=>{keyword=e.target.value; render();});
