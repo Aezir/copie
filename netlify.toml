@@ -22,3 +22,8 @@
   for = "/bubble.apk"
   [headers.values]
     Cache-Control = "no-store"
+
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-store"
