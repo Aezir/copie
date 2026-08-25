@@ -17,3 +17,8 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/bubble.apk"
+  [headers.values]
+    Cache-Control = "no-store"
