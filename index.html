@@ -221,12 +221,12 @@
   .switch{position:relative; width:42px; height:24px; flex:none;}
   .switch input{opacity:0; width:0; height:0; position:absolute;}
   .switch .track{position:absolute; inset:0; background:rgba(120,120,120,.35); border-radius:999px; transition:.2s; cursor:pointer;}
-  .switch .track:before{content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch .track:before{content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s;}
   .switch input:checked+.track{background:var(--accent);}
   .switch input:checked+.track:before{transform:translateX(18px);}
   .size-range{-webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:2px; background:var(--divider); outline:none; margin:6px 0 14px; cursor:pointer;}
-  .size-range::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--sheet); box-shadow:0 1px 5px rgba(0,0,0,.3); cursor:pointer;}
-  .size-range::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--sheet); box-shadow:0 1px 5px rgba(0,0,0,.3); cursor:pointer;}
+  .size-range::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); border:none; cursor:pointer;}
+  .size-range::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:none; cursor:pointer;}
   .size-val{color:var(--faint); font-variant-numeric:tabular-nums;}
   /* 代码高亮：透明 textarea 叠在着色 pre 之上 */
   .blk-edit .code-wrap{flex:1; min-width:0;}
@@ -269,7 +269,7 @@
   .set-row .rt .rt-sub{font-size:11.5px; color:var(--faint); margin-top:2px; line-height:1.5;}
   .seg-pill{display:flex; gap:2px; background:var(--hover); border-radius:8px; padding:2px; flex:none;}
   .seg-pill button{border:none; background:transparent; color:var(--muted); font-size:12.5px; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:inherit; white-space:nowrap;}
-  .seg-pill button.on{background:var(--sheet); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1);}
+  .seg-pill button.on{background:var(--sheet); color:var(--text);}
   .swatches{display:flex; flex-wrap:wrap; gap:12px; flex:none; padding:2px 0; justify-content:flex-end; max-width:62%;}
   .swatch{width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; padding:0; position:relative; display:flex; align-items:center; justify-content:center;}
   .swatch::after{content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid transparent;}
@@ -586,7 +586,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.5';
+const APP_VERSION='1.6';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
