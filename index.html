@@ -663,7 +663,7 @@ function customSwatch(kind,hex,extra){
   return `<button class="swatch swatch-custom${extra||''}${on}" data-custom="${kind}"${style} title="自定义取色">${hex?ic('checkOn'):''}</button>`;
 }
 function buildThemeUI(){
-  const t=loadTheme(), mode=t.mode||'auto', acc=t.accent||'blue';
+  const t=loadTheme(), mode=t.mode||'auto', acc=t.accent||ACCENTS[0].id;
   const seg=$('#themeSeg'); if(seg) seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.themeMode===mode));
   const box=$('#accentSwatches'); if(box) box.innerHTML=ACCENTS.map(a=>
     `<button class="swatch${a.id===acc&&!t.accentHex?' on':''}" data-accent="${a.id}" style="background:${effectiveDark(t)?a.dark:a.light}" title="${a.id}">${ic('checkOn')}</button>`).join('')
