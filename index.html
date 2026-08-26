@@ -586,7 +586,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.0';
+const APP_VERSION='1.1';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1099,9 +1099,12 @@ $('#bgSwatches').addEventListener('click',e=>{
   const t=loadTheme(); t.bg=b.dataset.bg; delete t.bgHex; saveTheme(t); applyTheme(); buildThemeUI(); });
 $('#backBtn').onclick=()=>$('#settingsPage').classList.remove('show');
 $('#exportItem').onclick=()=>{
-  const blob=new Blob([JSON.stringify({app:'copie',version:2,exportedAt:new Date().toISOString(),entries},null,2)],{type:'application/json'});
+  const json=JSON.stringify({app:'copie',version:2,exportedAt:new Date().toISOString(),entries},null,2);
+  const fname=`copie-备份-${stamp()}.json`;
+  if(window.AndroidBridge&&AndroidBridge.exportJson){ try{ AndroidBridge.exportJson(json, fname); return; }catch(_){} } // 壳 App：原生存到下载文件夹
+  const blob=new Blob([json],{type:'application/json'});
   const url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=`copie-备份-${stamp()}.json`; document.body.appendChild(a); a.click(); a.remove();
+  a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url); toast('已导出 JSON');
 };
 $('#copyAllItem').onclick=async()=>{ await copyText(JSON.stringify({app:'copie',version:2,entries},null,2)); toast('全部数据已复制'); };
