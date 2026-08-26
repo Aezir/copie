@@ -586,7 +586,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.1';
+const APP_VERSION='1.2';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1082,8 +1082,8 @@ $('#tagApply').onclick=async()=>{
 $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card">
   <div class="a-title">Copie · 本地复制箱</div>
   <div class="a-row">共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。</div>
-  <div class="a-row"><b style="color:var(--text)">作者 Aezir</b> · 兴趣使然开发</div>
-  <div class="a-row">严禁本项目用作任何商业用途</div>
+  <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
+  <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
   <a class="a-lic" href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank">PolyForm Noncommercial 1.0.0</a>
   <div class="a-ver">v${APP_VERSION}</div>
 </div>`; fillSyncForm(); buildThemeUI(); buildDisplayUI(); $('#settingsPage').classList.add('show'); };
