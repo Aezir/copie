@@ -328,8 +328,8 @@
 
   #toast{position:absolute; left:50%; bottom:40px; transform:translateX(-50%) translateY(16px); background:var(--text); color:var(--bg); padding:9px 16px; border-radius:8px; font-size:13px; opacity:0; transition:.22s; z-index:60; pointer-events:none; letter-spacing:0;}
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-  #undoBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-130%); display:flex; align-items:center; gap:12px; background:var(--accent); color:#fff; padding:10px 12px 10px 16px; border-radius:0 0 12px 12px; box-shadow:0 6px 22px rgba(0,0,0,.18); font-size:13.5px; z-index:200; max-width:90vw; pointer-events:none; transition:transform .28s cubic-bezier(.22,1,.36,1);}
-  #undoBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  #undoBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-140%); display:flex; align-items:center; gap:12px; background:var(--accent); color:#fff; padding:10px 12px 10px 16px; border-radius:0 0 12px 12px; font-size:13.5px; z-index:200; max-width:90vw; pointer-events:none; transition:transform .28s cubic-bezier(.22,1,.36,1);}
+  #undoBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto; box-shadow:0 6px 22px rgba(0,0,0,.18);}
   #undoBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62vw;}
   #undoBarBtn{flex:none; background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:7px; padding:5px 12px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s;}
   #undoBarBtn:hover{background:rgba(255,255,255,.32);}
@@ -402,7 +402,8 @@
 
       <div class="sec-label" style="display:flex;align-items:center;gap:2px">数据<button class="help-btn" id="importHelp" aria-label="导入格式说明"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
-      <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入<small>从 JSON 恢复，合并不覆盖</small></div></div>
+      <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入文件<small>选一个 JSON 文件恢复，合并不覆盖</small></div></div>
+      <div class="menu-item" id="importClipItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">从剪贴板导入<small>直接粘贴 JSON 文本导入</small></div></div>
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
@@ -585,7 +586,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='0.9';
+const APP_VERSION='1.0';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1104,18 +1105,32 @@ $('#exportItem').onclick=()=>{
   URL.revokeObjectURL(url); toast('已导出 JSON');
 };
 $('#copyAllItem').onclick=async()=>{ await copyText(JSON.stringify({app:'copie',version:2,entries},null,2)); toast('全部数据已复制'); };
-$('#importItem').onclick=()=>$('#fileInp').click();
-$('#fileInp').onchange=async e=>{
-  const file=e.target.files[0]; if(!file) return;
+async function importFromText(text, src){
+  let data;
+  try{ data=JSON.parse(text); }
+  catch(err){ toast(`导入失败：${src}不是有效 JSON（${(err.message||'').slice(0,36)}）`); return; }
+  const incoming = Array.isArray(data) ? data : (data && Array.isArray(data.entries) ? data.entries : null);
+  if(!incoming){ toast('导入失败：JSON 里没有 entries 数组'); return; }
+  if(!incoming.length){ toast('导入失败：数据是空的'); return; }
+  let c=0;
   try{
-    const data=JSON.parse(await file.text());
-    const incoming=Array.isArray(data)?data:(data.entries||[]);
-    if(!Array.isArray(incoming)||!incoming.length){ toast('文件里没有数据'); return; }
-    let c=0;
-    for(const raw of incoming){ const ent=normalize(raw); if(findEnt(ent.id)) ent.id=uid(); entries.push(ent); await put(ent); c++; }
-    render(); toast(`成功导入 ${c} 条`);
-  }catch{ toast('导入失败：格式不对'); }
-  e.target.value='';
+    for(const raw of incoming){ const ent=normalize(raw);
+      if(!ent.title && !(ent.blocks&&ent.blocks.length)) continue; // 跳过空条目
+      if(findEnt(ent.id)) ent.id=uid();
+      entries.push(ent); await put(ent); c++; }
+  }catch(err){ render(); toast('导入失败：写入本地库出错 '+((err&&err.message)||'')); return; }
+  render();
+  toast(c ? `成功导入 ${c} 条` : '导入失败：没有可用的条目（检查 title/blocks 字段）');
+}
+$('#importItem').onclick=()=>$('#fileInp').click();
+$('#fileInp').onchange=async e=>{ const file=e.target.files[0]; if(!file) return;
+  await importFromText(await file.text(), '文件'); e.target.value=''; };
+$('#importClipItem').onclick=async()=>{
+  let text='';
+  try{ text=await navigator.clipboard.readText(); }
+  catch(err){ toast('读不到剪贴板（未授权或不支持），请改用「导入文件」'); return; }
+  if(!text || !text.trim()){ toast('剪贴板是空的，先复制 JSON 再来'); return; }
+  await importFromText(text, '剪贴板内容');
 };
 
 /* ---------- 云同步（自动，私有仓库） ---------- */
