@@ -209,7 +209,13 @@
   .menu-item:hover{background:var(--hover);}
   .menu-item .ic{width:20px; height:20px; color:var(--muted);}
   .menu-item .mt small{display:block; color:var(--faint); font-size:11.5px; margin-top:2px; letter-spacing:0;}
-  .about{color:var(--faint); font-size:12.5px; line-height:1.9; padding:10px 8px;}
+  .about{color:var(--faint); font-size:12.5px; line-height:1.9; padding:6px 4px;}
+  .about-card{background:var(--field); border-radius:12px; padding:14px 16px; line-height:1.7; font-size:13px; color:var(--muted);}
+  .about-card .a-title{font-weight:600; color:var(--text); font-size:14px;}
+  .about-card .a-row{margin-top:8px;}
+  .about-card .a-lic{display:inline-block; margin-top:10px; padding:4px 11px; border-radius:999px; background:var(--hover); color:var(--accent); font-size:12px; text-decoration:none;}
+  .about-card .a-ver{color:var(--faint); font-size:11.5px; margin-top:12px;}
+  .fmt-pre, .prompt-box pre{background:var(--field); border-radius:8px; padding:10px 12px; margin:6px 0; font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:break-word; color:var(--text); overflow-x:auto;}
   .bubble-card{background:var(--field); border-radius:12px; padding:4px 12px;}
   .bubble-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; font-size:14px;}
   .switch{position:relative; width:42px; height:24px; flex:none;}
@@ -394,7 +400,7 @@
         </div>
       </div>
 
-      <div class="sec-label">数据</div>
+      <div class="sec-label" style="display:flex;align-items:center;gap:2px">数据<button class="help-btn" id="importHelp" aria-label="导入格式说明"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
       <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入<small>从 JSON 恢复，合并不覆盖</small></div></div>
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
@@ -484,6 +490,41 @@
     </div>
   </div>
 
+  <div class="sheet-mask" id="importHelpMask">
+    <div class="sheet">
+      <div class="help-head">
+        <h2>导入格式 &amp; 让 AI 帮你转换</h2>
+        <button class="ghost-ico" id="importHelpClose" aria-label="关闭"><svg class="ic" viewBox="0 0 24 24"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/></svg></button>
+      </div>
+      <div class="help-body">
+        <h4>① 导入的格式</h4>
+        <p>导入的是一个 JSON 文件，结构长这样：</p>
+        <pre class="fmt-pre">{
+  "app": "copie",
+  "version": 2,
+  "entries": [
+    {
+      "title": "条目标题",
+      "tags": ["分类标签", "可选"],
+      "blocks": ["一段可整段复制的文本", "同一条目的第二段"]
+    }
+  ]
+}</pre>
+        <p><b>blocks</b> 是字符串数组，每段 = 一个「点一下就整段复制」的内容（如一个 API key、一段人设、一个 baseurl）。相关内容放进同一条目的不同 block。</p>
+        <h4>② 让 AI 帮你转</h4>
+        <p>复制下面这段发给任意 AI，末尾贴上你的内容，它就会吐出能直接导入的 JSON：</p>
+        <div class="prompt-box"><pre id="aiPrompt">请把我下面的内容整理成 Copie 复制箱的导入 JSON。
+格式：顶层对象 {"app":"copie","version":2,"entries":[...]}；
+每个 entry = {"title":"条目标题","tags":["可选标签"],"blocks":["一段可复制文本","另一段"]}。
+规则：blocks 是字符串数组，每段是「点一下就整段复制」的内容（API key、人设、baseurl 等）；把相关内容放进同一 entry 的不同 block；tags 用来分类，可省略。
+只输出 JSON 本身，不要任何解释或代码块标记。我的内容：
+（在这里粘贴你的原始内容）</pre>
+          <button class="btn primary" id="copyPromptBtn" style="margin-top:8px">复制这段 Prompt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="sheet-mask" id="helpMask">
     <div class="sheet">
       <div class="help-head">
@@ -544,7 +585,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='0.8';
+const APP_VERSION='0.9';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -772,7 +813,8 @@ function buildDisplayUI(){ const m=loadMeta();
   const bindMeta=(id,key)=>{ const el=$('#'+id); if(el) el.onchange=ev=>{ const mm=loadMeta(); mm[key]=ev.target.checked; saveMeta(mm); render(); }; };
   bindMeta('metaDate','date'); bindMeta('metaTime','time'); bindMeta('metaWords','words'); bindMeta('metaTokens','tokens');
   const hl=$('#hlToggle'); if(hl) hl.onchange=ev=>{ saveHl(ev.target.checked); applyHl(); };
-  const pv=$('#privToggle'); if(pv) pv.onchange=ev=>{ savePrivacy(ev.target.checked); render(); }; }
+  const pv=$('#privToggle'); if(pv) pv.onchange=ev=>{ savePrivacy(ev.target.checked); render();
+    try{ window.AndroidBridge&&AndroidBridge.setPrivacy&&AndroidBridge.setPrivacy(ev.target.checked); }catch(_){} }; }
 function allOpen(){ return lastRendered.length>0 && lastRendered.every(id=>openSet.has(id)); }
 function refreshExpandIcon(){ $('#expandBtn').innerHTML=ic(allOpen()?'contract':'expand'); }
 
@@ -1036,7 +1078,14 @@ $('#tagApply').onclick=async()=>{
 };
 
 /* ---------- 设置页 ---------- */
-$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`Copie · 本地复制箱<br>共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。<br><br><b>作者 Aezir</b>，兴趣使然开发了这个应用。<br>严禁本项目用作任何商业用途。<br>许可证：<a href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank" style="color:var(--accent)">PolyForm Noncommercial 1.0.0</a><br><span style="color:var(--faint)">v${APP_VERSION}</span>`; fillSyncForm(); buildThemeUI(); buildDisplayUI(); $('#settingsPage').classList.add('show'); };
+$('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card">
+  <div class="a-title">Copie · 本地复制箱</div>
+  <div class="a-row">共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。</div>
+  <div class="a-row"><b style="color:var(--text)">作者 Aezir</b> · 兴趣使然开发</div>
+  <div class="a-row">严禁本项目用作任何商业用途</div>
+  <a class="a-lic" href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank">PolyForm Noncommercial 1.0.0</a>
+  <div class="a-ver">v${APP_VERSION}</div>
+</div>`; fillSyncForm(); buildThemeUI(); buildDisplayUI(); $('#settingsPage').classList.add('show'); };
 $('#themeSeg').addEventListener('click',e=>{ const b=e.target.closest('[data-theme-mode]'); if(!b) return;
   const t=loadTheme(); t.mode=b.dataset.themeMode; saveTheme(t); applyTheme(); buildThemeUI(); });
 $('#accentSwatches').addEventListener('click',e=>{
@@ -1175,6 +1224,10 @@ $('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); con
   if(!tok){ toast('先粘贴 token'); return; } if(!pass){ toast('先设置主密码'); return; }
   const c=loadSync(); c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); toast('连接中…'); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
+$('#importHelp').onclick=()=>$('#importHelpMask').classList.add('show');
+$('#importHelpClose').onclick=()=>$('#importHelpMask').classList.remove('show');
+$('#importHelpMask').addEventListener('click',e=>{ if(e.target.id==='importHelpMask') e.currentTarget.classList.remove('show'); });
+$('#copyPromptBtn').onclick=async()=>{ await copyText($('#aiPrompt').innerText); toast('Prompt 已复制'); };
 $('#syncHelp').onclick=()=>$('#helpMask').classList.add('show');
 $('#helpClose').onclick=()=>$('#helpMask').classList.remove('show');
 $('#helpMask').addEventListener('click',e=>{ if(e.target.id==='helpMask') e.currentTarget.classList.remove('show'); });
@@ -1210,6 +1263,7 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   $('#bubbleSec').style.display='';
   $('#bubbleToggle').checked=!!AndroidBridge.isBubbleOn();
   $('#bubbleToggle').onchange=e=>AndroidBridge.setBubble(!!e.target.checked);
+  try{ AndroidBridge.setPrivacy&&AndroidBridge.setPrivacy(loadPrivacy()); }catch(_){} // 把隐私状态同步给原生悬浮层
   try{ const sz=AndroidBridge.getBubbleSize?AndroidBridge.getBubbleSize():48;
     $('#bubbleSize').value=sz; $('#bubbleSizeVal').textContent=sz;
     $('#bubbleSize').oninput=ev=>{ $('#bubbleSizeVal').textContent=ev.target.value; };
