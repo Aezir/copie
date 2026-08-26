@@ -586,7 +586,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.3';
+const APP_VERSION='1.4';
 const DB_NAME='copybox', STORE='entries', DB_VER=1;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -654,6 +654,7 @@ function applyTheme(){
   }
   const meta=document.querySelector('meta[name="theme-color"]:not([media])')||(()=>{ const m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); return m; })();
   meta.setAttribute('content', metaBg);
+  try{ window.AndroidBridge&&AndroidBridge.setBarTheme&&AndroidBridge.setBarTheme(!!dark); }catch(_){} // 悬浮条跟随深浅主题
 }
 applyTheme();
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{ const t=loadTheme(); if(t.mode==='light'||t.mode==='dark') return; applyTheme(); buildThemeUI(); });
