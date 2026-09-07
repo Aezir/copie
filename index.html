@@ -244,6 +244,9 @@
   .sync-btns{display:flex; gap:8px; margin-top:2px;}
   .sync-btns .btn{padding:9px;}
   .sync-note{font-size:11.5px; color:var(--faint); line-height:1.7; padding:9px 2px 0;}
+  .snap-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 2px; border-bottom:1px solid var(--divider);}
+  .snap-row:last-child{border-bottom:none;}
+  .snap-row .btn{padding:7px 12px; flex:0 0 auto;}
   .sync-hd{display:flex; align-items:center; gap:5px;}
   .help-btn{border:none; background:transparent; color:var(--faint); cursor:pointer; width:20px; height:20px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%;}
   .help-btn .ic{width:16px; height:16px;}
@@ -404,9 +407,14 @@
       <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
       <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入文件<small>选一个 JSON 文件恢复，合并不覆盖</small></div></div>
       <div class="menu-item" id="importClipItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">从剪贴板导入<small>直接粘贴 JSON 文本导入</small></div></div>
+      <div class="menu-item" id="snapItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12H4C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C9.25022 4 6.82447 5.38734 5.38451 7.50024L8 7.5V9.5H2V3.5H4L3.99989 5.99918C5.82434 3.57075 8.72873 2 12 2ZM13 7L12.9998 11.585L16.2426 14.8284L14.8284 16.2426L10.9998 12.413L11 7H13Z"/></svg><div class="mt">本地快照<small>每天首次打开、每次同步前自动留底，可一键恢复</small></div></div>
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
+      <div class="menu-item" id="syncNowItem"><svg class="ic" viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg><div class="mt">立即同步<small>拉云端、逐条合并、再上传；不会整份覆盖</small></div></div>
+      <div class="bubble-card">
+        <div class="bubble-row"><span>改动后自动同步（停手 1.5 秒）</span><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
+      </div>
       <div class="sync-box">
         <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
         <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
@@ -441,6 +449,9 @@
         <div class="bubble-row"><span>字数</span><label class="switch"><input type="checkbox" id="metaWords"><span class="track"></span></label></div>
         <div class="bubble-row"><span>Token（估算）</span><label class="switch"><input type="checkbox" id="metaTokens"><span class="track"></span></label></div>
       </div>
+
+      <div class="sec-label">更新</div>
+      <div class="menu-item" id="updateItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 13V18.585L14.8284 16.7574L16.2426 18.1716L12 22.4142L7.75736 18.1716L9.17157 16.7574L11 18.585V13H13ZM12 2C15.5934 2 18.5544 4.70761 18.9541 8.19395C21.2858 8.83154 23 10.9656 23 13.5C23 16.3688 20.8036 18.7246 18.0006 18.9776L18.0009 16.9644C19.6966 16.7214 21 15.2629 21 13.5C21 11.567 19.433 10 17.5 10C17.2912 10 17.0867 10.0183 16.8887 10.054C16.9616 9.7142 17 9.36158 17 9C17 6.23858 14.7614 4 12 4C9.23858 4 7 6.23858 7 9C7 9.36158 7.03838 9.7142 7.11205 10.0533C6.91331 10.0183 6.70879 10 6.5 10C4.567 10 3 11.567 3 13.5C3 15.2003 4.21241 16.6174 5.81986 16.934L6.00005 16.9646L6.00039 18.9776C3.19696 18.7252 1 16.3692 1 13.5C1 10.9656 2.71424 8.83154 5.04648 8.19411C5.44561 4.70761 8.40661 2 12 2Z"/></svg><div class="mt">检查软件更新<small>点击联网检查</small></div></div>
 
       <div class="sec-label">关于</div>
       <div class="about" id="aboutBox"></div>
@@ -534,7 +545,7 @@
       </div>
       <div class="help-body">
         <h4>一句话</h4>
-        <p>数据<b>加密后</b>才上云，云端只见密文。上传"改完自动"，下载"打开自动"。连一次，以后不用管。</p>
+        <p>数据<b>加密后</b>才上云，云端只见密文。打开 App <b>先读本机</b>；同步时<b>逐条合并</b>（按条取新、删除也会同步），不会整份覆盖。</p>
 
         <h4>① 怎么开（只需一次）</h4>
         <ol>
@@ -549,14 +560,27 @@
         <h4>③ 同步逻辑</h4>
         <ul>
           <li><b>加密</b>：上云前用主密码把整份数据加密（AES-GCM），GitHub 上只存密文，拿到 token 或仓库也读不出内容</li>
-          <li><b>上传</b>：加/改/删/置顶/收藏等任何改动，停手 1.5 秒后自动上传（整份数据）</li>
-          <li><b>下载</b>：每次打开 App 自动拉云端最新</li>
-          <li><b>谁新谁赢</b>：整份按"最后保存时间"比，新的覆盖旧的；<b>首次连接会合并</b>两端，不丢数据</li>
+          <li><b>启动本地优先</b>：打开 App 只读本机数据，<b>不自动拉云端</b>；想拉就点「立即同步」</li>
+          <li><b>逐条合并</b>：同一条谁改得晚用谁的；一边有另一边没有的补上；在某台设备删掉的条目会带"删除记录"，其他设备同步后也删，不靠整份覆盖</li>
+          <li><b>自动上传</b>：开着「改动后自动同步」时，停手 1.5 秒后做一次同样的合并同步；关掉就纯手动</li>
+          <li><b>安全阀</b>：同步会让本机少掉一半以上条目时先问你；本机为空却要清掉云端也会先问；同步前自动留本机快照</li>
           <li>token 和主密码都只存<b>本机浏览器</b>，不进代码、不上云</li>
         </ul>
 
         <h4>注意</h4>
-        <div class="tip">• <b>主密码丢了，云端数据永远解不开</b>——请务必记牢（本地 App 里的数据不受影响）<br>• token 只授权 copie-data 这一个仓，泄露了也碰不到你别的仓库；建议设过期、定期换<br>• 要联网、在网址(https)下才通<br>• 别两台都离线各改一通再同步——后保存的会盖掉先保存的整份<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
+        <div class="tip">• <b>主密码丢了，云端数据永远解不开</b>——请务必记牢（本地 App 里的数据不受影响）<br>• token 只授权 copie-data 这一个仓，泄露了也碰不到你别的仓库；建议设过期、定期换<br>• 要联网、在网址(https)下才通<br>• 云端仓库 copie-data 每次上传都是一次 git 提交，历史都在，误删也能从旧提交里找回<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-mask" id="snapMask">
+    <div class="sheet">
+      <h2>本地快照</h2>
+      <div class="sync-note" style="padding-top:0">恢复 = 把快照里的条目<b>合并</b>回本机（现有的保留，缺的补回来），不会清掉现在的数据。</div>
+      <div id="snapList"></div>
+      <div class="sheet-btns">
+        <button class="btn ghost" id="snapClose">关闭</button>
+        <button class="btn primary" id="snapNow">现在留一份</button>
       </div>
     </div>
   </div>
@@ -586,17 +610,36 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.6';
-const DB_NAME='copybox', STORE='entries', DB_VER=1;
+const APP_VERSION='1.7';
+const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
-  r.onupgradeneeded=e=>{const d=e.target.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'});};
+  r.onupgradeneeded=e=>{const d=e.target.result;
+    if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'});
+    if(!d.objectStoreNames.contains(BK_STORE)) d.createObjectStore(BK_STORE,{keyPath:'at'});};
   r.onsuccess=e=>{db=e.target.result; res();}; r.onerror=e=>rej(e.target.error);});}
-function tx(m){return db.transaction(STORE,m).objectStore(STORE);}
+function tx(m,store=STORE){return db.transaction(store,m).objectStore(store);}
 function getAll(){return new Promise((res,rej)=>{const r=tx('readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);});}
-function put(i){return new Promise((res,rej)=>{const r=tx('readwrite').put(i); r.onsuccess=()=>{ touched(); res(); }; r.onerror=()=>rej(r.error);});}
-function del(id){return new Promise((res,rej)=>{const r=tx('readwrite').delete(id); r.onsuccess=()=>{ touched(); res(); }; r.onerror=()=>rej(r.error);});}
-function clearStore(){return new Promise((res,rej)=>{const r=tx('readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error);});}
+/* 本机写入：打 syncAt（同步用的"最后改动时间"，不参与排序），并撤掉同 id 的删除墓碑 */
+function put(i){ if(!applyingRemote){ i.syncAt=now(); tombDel(i.id); }
+  return new Promise((res,rej)=>{const r=tx('readwrite').put(i); r.onsuccess=()=>{ touched(); res(); }; r.onerror=()=>rej(r.error);});}
+/* 本机删除：留一个"墓碑"（id→删除时间），同步时告诉其他设备这条是被删掉的，而不是靠整份覆盖 */
+function del(id){ if(!applyingRemote) tombAdd(id);
+  return new Promise((res,rej)=>{const r=tx('readwrite').delete(id); r.onsuccess=()=>{ touched(); res(); }; r.onerror=()=>rej(r.error);});}
+const TOMB_KEY='copie.tomb';
+function loadTomb(){ try{ return JSON.parse(localStorage.getItem(TOMB_KEY))||{}; }catch(_){ return {}; } }
+function saveTomb(t){ localStorage.setItem(TOMB_KEY, JSON.stringify(t)); }
+function tombAdd(id){ const t=loadTomb(); t[id]=now(); saveTomb(t); }
+function tombDel(id){ const t=loadTomb(); if(t[id]!==undefined){ delete t[id]; saveTomb(t); } }
+function pruneTomb(t){ const cut=now()-90*86400e3; for(const k in t) if(!(t[k]>cut)) delete t[k]; return t; }
+/* 本机快照：同步前 / 每日首次打开 / 手动 各留一份整库副本，最多 8 份，随时可恢复 */
+function bkList(){ return new Promise((res,rej)=>{ const r=tx('readonly',BK_STORE).getAll(); r.onsuccess=()=>res((r.result||[]).sort((a,b)=>b.at-a.at)); r.onerror=()=>rej(r.error); }); }
+function bkPut(s){ return new Promise((res,rej)=>{ const r=tx('readwrite',BK_STORE).put(s); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function bkDel(at){ return new Promise((res,rej)=>{ const r=tx('readwrite',BK_STORE).delete(at); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+async function snapshot(reason){ if(!entries.length) return;
+  try{ await bkPut({at:now(),reason,count:entries.length,entries:entries.map(e=>({...e}))});
+    const all=await bkList(); for(const o of all.slice(8)) await bkDel(o.at); }catch(e){ console.warn('snapshot:',e); } }
+async function snapshotDaily(){ try{ const all=await bkList(); if(!all.length || now()-all[0].at>86400e3) await snapshot('daily'); }catch(_){} }
 
 let entries=[], editingId=null, keyword='';
 let selectedTags=new Set(), sortMode='updated';
@@ -769,7 +812,8 @@ function normalize(raw){
   else if(Array.isArray(raw.fields)){ blocks=[]; raw.fields.forEach(f=>{ const l=(f.label||'').trim(); if(l)blocks.push(l); if((f.value||'')!=='')blocks.push(f.value); }); }
   else blocks=[];
   return { id:raw.id||uid(), title:raw.title||'未命名', tags:Array.isArray(raw.tags)?raw.tags:[],
-    blocks, fav:!!raw.fav, pinned:!!raw.pinned, createdAt:raw.createdAt||now(), updatedAt:raw.updatedAt||now() };
+    blocks, fav:!!raw.fav, pinned:!!raw.pinned, createdAt:raw.createdAt||now(), updatedAt:raw.updatedAt||now(),
+    syncAt:raw.syncAt||raw.updatedAt||now() };
 }
 
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -1137,14 +1181,16 @@ $('#importClipItem').onclick=async()=>{
   await importFromText(text, '剪贴板内容');
 };
 
-/* ---------- 云同步（自动，私有仓库） ---------- */
+/* ---------- 云同步（逐条合并；启动不自动拉，手动 / 改动后自动） ---------- */
 const SYNC_KEY='copie.sync';
 let applyingRemote=false, syncing=false, autoPushTimer=null;
 function loadSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(_){ return {}; } }
 function saveSyncCfg(c){ localStorage.setItem(SYNC_KEY, JSON.stringify(c)); }
-function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||''; updateSyncNote(); }
+function autoSyncOn(){ return loadSync().auto!==false; }
+function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||'';
+  if($('#autoSyncToggle')) $('#autoSyncToggle').checked=autoSyncOn(); updateSyncNote(); }
 function updateSyncNote(){ const c=loadSync(), el=$('#syncNote'); if(!el) return;
-  if(c.token){ el.innerHTML=`✅ 已连接${c.repo?`：<b>${esc(c.repo)}</b>`:''}${c.lastSync?` · 上次同步 ${new Date(c.lastSync).toLocaleString()}`:''}<br>数据已<b>加密</b>后上传，云端只见密文。换设备填<b>同一个 token + 同一个主密码</b>即可自动拉取解密。`; }
+  if(c.token){ el.innerHTML='✅ 已连接'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 只读本机数据，不自动拉云端；点上面「立即同步」做逐条合并。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
   else{ el.innerHTML='先在 GitHub 手动建一个<b>私有</b>仓库 <code>copie-data</code>，再生成 <b>fine-grained</b> token（只授权这一个仓库、Contents 读写），连同一个<b>主密码</b>一起填。数据会<b>加密</b>后才上云；Token 与主密码都<b>只存本机浏览器</b>，不进代码、不上云。'; }
 }
 function ghH(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
@@ -1172,12 +1218,21 @@ async function decEnvelope(env,pass){
   const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToU8(env.iv)},key,b64ToU8(env.ct));
   return JSON.parse(new TextDecoder().decode(pt));
 }
-function contentsUrl(c){ return `https://api.github.com/repos/${c.repo}/contents/${c.path.split('/').map(encodeURIComponent).join('/')}`; }
-function mergeEntries(a,b){ const m=new Map(); a.forEach(e=>m.set(e.id,e));
-  b.forEach(e=>{ const cur=m.get(e.id); if(!cur||(e.updatedAt||0)>=(cur.updatedAt||0)) m.set(e.id,e); }); return [...m.values()]; }
+function contentsUrl(c){ return 'https://api.github.com/repos/'+c.repo+'/contents/'+c.path.split('/').map(encodeURIComponent).join('/'); }
+
+/* ---- 合并规则 ---- */
+const stampOf=e=>e.syncAt||e.updatedAt||0;
+/* 两端条目按 id 合并：同 id 取 syncAt 晚的；墓碑（删除时间）比条目晚 → 这条已删 */
+function mergeSets(local, remote, tomb){ const m=new Map();
+  local.forEach(e=>m.set(e.id,e));
+  remote.forEach(e=>{ const cur=m.get(e.id); if(!cur||stampOf(e)>stampOf(cur)) m.set(e.id,e); });
+  for(const id in tomb){ const e=m.get(id); if(e && tomb[id]>=stampOf(e)) m.delete(id); }
+  return [...m.values()]; }
+function mergeTomb(a,b){ const t={...a}; for(const k in b) if(!(t[k]>=b[k])) t[k]=b[k]; return pruneTomb(t); }
+function fingerprint(list){ return list.map(e=>e.id+':'+stampOf(e)).sort().join('|'); }
 
 async function remotePull(c){
-  const r=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c)});
+  const r=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c),cache:'no-store'});
   if(r.status===404) return null;
   if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
   if(!r.ok) throw new Error('读取失败 '+r.status);
@@ -1185,64 +1240,124 @@ async function remotePull(c){
   if(raw && raw.enc==='aesgcm'){
     const pass=getPass(); if(!pass) throw new Error('需要主密码才能解密云端数据');
     let inner; try{ inner=await decEnvelope(raw,pass); }catch(_){ throw new Error('主密码不对，无法解密云端数据'); }
-    return {savedAt:raw.savedAt||0, entries:inner.entries||[]};
+    return {savedAt:raw.savedAt||0, entries:Array.isArray(inner.entries)?inner.entries:[], deleted:(inner.deleted&&typeof inner.deleted==='object')?inner.deleted:{}};
   }
-  return raw; // 兼容旧的明文数据（下次上传会自动转成密文）
+  // 兼容旧的明文数据（下次上传会自动转成密文）
+  const list=Array.isArray(raw)?raw:(raw&&Array.isArray(raw.entries)?raw.entries:[]);
+  return {savedAt:(raw&&raw.savedAt)||0, entries:list, deleted:{}};
 }
-async function remotePush(c){
+async function remotePush(c, list, deleted){
   const pass=getPass(); if(!pass) throw new Error('缺少主密码，无法加密上传');
-  const env=await encEnvelope({entries},pass);
-  const content=b64enc(JSON.stringify({app:'copie',version:3,savedAt:c.savedAt||now(),...env},null,2));
-  const attempt=sha=>{ const body={message:'copie '+new Date().toISOString(),content,branch:c.branch}; if(sha) body.sha=sha;
+  const env=await encEnvelope({entries:list, deleted:deleted||{}},pass);
+  const content=b64enc(JSON.stringify({app:'copie',version:4,savedAt:c.savedAt||now(),count:list.length,...env},null,2));
+  const attempt=sha=>{ const body={message:'copie '+new Date().toISOString()+' ('+list.length+' 条)',content,branch:c.branch}; if(sha) body.sha=sha;
     return fetch(contentsUrl(c),{method:'PUT',headers:ghH(c),body:JSON.stringify(body)}); };
   let p=await attempt(c._sha);
-  if(p.status===409||p.status===422){ const g=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c)}); const sha=g.status===200?(await g.json()).sha:undefined; p=await attempt(sha); }
+  if(p.status===409||p.status===422){ const g=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c),cache:'no-store'}); const sha=g.status===200?(await g.json()).sha:undefined; p=await attempt(sha); }
   if(!p.ok) throw new Error('上传失败 '+p.status);
   const j=await p.json(); c._sha=j.content&&j.content.sha; c.lastSync=now(); saveSyncCfg(c);
 }
-async function applyRemoteEntries(arr){ applyingRemote=true; try{ await clearStore(); for(const e of arr) await put(e); } finally{ applyingRemote=false; }
-  entries=arr; openSet.clear(); render(); }
+/* 把合并结果写进本机库：只动有差异的条目，绝不清库 */
+async function applyMerged(merged){
+  const before=new Map(entries.map(e=>[e.id,e])), after=new Map(merged.map(e=>[e.id,e]));
+  applyingRemote=true;
+  try{
+    for(const [id,e] of after){ const b=before.get(id); if(!b || b!==e) await put(e); }
+    for(const id of before.keys()) if(!after.has(id)) await del(id);
+  } finally{ applyingRemote=false; }
+  entries=merged; render();
+}
 async function ensureRepo(c){
-  const r=await fetch(`https://api.github.com/repos/${c.repo}`,{headers:ghH(c)});
+  const r=await fetch('https://api.github.com/repos/'+c.repo,{headers:ghH(c)});
   if(r.ok) return;
   if(r.status===404) throw new Error('没找到仓库 copie-data，请先在 GitHub 手动建一个空的私有仓库 copie-data');
   if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
   throw new Error('检查仓库失败 '+r.status);
 }
 
-async function syncNow(showToast){
-  const c=loadSync(); if(!c.token||syncing) return; syncing=true;
+/* 同步 = 拉云端 → 与本机逐条合并 → 有差异才写本机 / 才上传。manual=true 时会弹确认、报结果 */
+async function syncNow(manual){
+  const c=loadSync(); if(!c.token){ if(manual) toast('先在下面填 token 和主密码'); return; }
+  if(syncing){ if(manual) toast('正在同步…'); return; } syncing=true;
+  if(manual) toast('同步中…');
   try{
     if(!c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
       if(u.status===401||u.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）'); if(!u.ok) throw new Error('连接失败 '+u.status);
       c.repo=(await u.json()).login+'/copie-data'; c.path='copie-data.json'; c.branch='main'; saveSyncCfg(c); await ensureRepo(c); }
     const remote=await remotePull(c);
-    const rEntries=remote?(Array.isArray(remote)?remote:remote.entries||[]).map(normalize):null;
-    const rSaved=remote?(remote.savedAt||0):-1, lSaved=c.savedAt||0;
-    if(!c.linked){
-      if(rEntries&&rEntries.length){ await applyRemoteEntries(mergeEntries(entries,rEntries)); }
-      c.linked=true; c.savedAt=now(); saveSyncCfg(c); await remotePush(c); saveSyncCfg(c);
-      if(showToast) toast('已连接并同步');
-    } else if(remote && rSaved>lSaved){
-      await applyRemoteEntries(rEntries); c.savedAt=rSaved; c.lastSync=now(); saveSyncCfg(c); if(showToast) toast('已拉取云端最新');
-    } else if(lSaved>rSaved || !remote){
-      await remotePush(c); saveSyncCfg(c); if(showToast) toast('已同步到云端');
-    } else if(showToast){ toast('已是最新'); }
-    updateSyncNote();
-  }catch(err){ if(showToast) toast(String(err.message||err)); else console.warn('sync:',err); }
+    const rEntries=remote?remote.entries.map(normalize):[], rDeleted=remote?remote.deleted:{};
+    const tomb=mergeTomb(loadTomb(), rDeleted);
+    const merged=mergeSets(entries, rEntries, tomb);
+    const mergedIds=new Set(merged.map(e=>e.id));
+    const lost=entries.filter(e=>!mergedIds.has(e.id)).length;
+    /* 安全阀 1：本机会少掉 ≥3 条且超过一半 → 自动同步直接放弃；手动同步先问 */
+    if(lost>=3 && lost>entries.length/2){
+      if(!manual){ c.lastErr='合并会删掉本机 '+lost+' 条，已跳过自动同步，请手动确认'; saveSyncCfg(c); updateSyncNote(); return; }
+      if(!confirm('合并后会从本机删掉 '+lost+' 条（在其他设备上删除过的）。\n继续前会自动留一份本机快照，可在「本地快照」里恢复。\n确定继续？')){ toast('已取消'); return; }
+    }
+    /* 安全阀 2：本机合并后为空、云端却有数据 → 绝不悄悄清云端 */
+    if(!merged.length && rEntries.length){
+      if(!manual){ c.lastErr='本机为空而云端有 '+rEntries.length+' 条，已拒绝自动上传'; saveSyncCfg(c); updateSyncNote(); return; }
+      if(!confirm('云端有 '+rEntries.length+' 条，本机合并后是空的。\n继续会把云端也清空（仓库历史仍可找回）。确定？')){ toast('已取消'); return; }
+    }
+    const localChanged=fingerprint(merged)!==fingerprint(entries);
+    const remoteChanged=!remote || fingerprint(merged)!==fingerprint(rEntries) || JSON.stringify(tomb)!==JSON.stringify(rDeleted||{});
+    if(localChanged){ await snapshot('sync'); await applyMerged(merged); }
+    saveTomb(tomb);
+    if(remoteChanged){ c.savedAt=now(); saveSyncCfg(c); await remotePush(c, merged, tomb); }
+    c.linked=true; c.lastSync=now(); delete c.lastErr; saveSyncCfg(c); updateSyncNote();
+    if(manual) toast((localChanged||remoteChanged)?('已同步，本机 '+merged.length+' 条'):'已是最新');
+  }catch(err){ const msg=String(err.message||err); const cc=loadSync(); cc.lastErr=msg; saveSyncCfg(cc); updateSyncNote();
+    if(manual) toast(msg); else console.warn('sync:',err); }
   finally{ syncing=false; }
 }
-/* 任何本地数据写入后：标记时间 + 防抖自动上传 */
+/* 任何本地数据写入后：记时间；若开了自动同步则防抖 1.5s 做一次合并同步 */
 function touched(){ if(applyingRemote) return; const c=loadSync(); if(!c.token) return;
   c.savedAt=now(); saveSyncCfg(c);
-  clearTimeout(autoPushTimer); autoPushTimer=setTimeout(async()=>{ const cc=loadSync();
-    if(!cc.token||syncing) return; if(!cc.repo){ syncNow(false); return; }
-    try{ await remotePush(cc); updateSyncNote(); }catch(e){ console.warn('autopush:',e); } },1500); }
+  if(!autoSyncOn()) return;
+  clearTimeout(autoPushTimer); autoPushTimer=setTimeout(()=>syncNow(false),1500); }
 
 $('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); const pass=$('#syncPass').value;
   if(!tok){ toast('先粘贴 token'); return; } if(!pass){ toast('先设置主密码'); return; }
-  const c=loadSync(); c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); toast('连接中…'); await syncNow(true); fillSyncForm(); };
+  const c=loadSync(); if(c.token!==tok){ delete c.repo; delete c._sha; } c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
+$('#syncNowItem').onclick=()=>syncNow(true);
+$('#autoSyncToggle').onchange=e=>{ const c=loadSync(); c.auto=!!e.target.checked; saveSyncCfg(c); toast(c.auto?'改动后会自动同步':'已改为纯手动同步'); };
+
+/* ---------- 本地快照：查看 / 恢复 / 手动留底 ---------- */
+const SNAP_REASON={sync:'同步前自动',daily:'每日自动',manual:'手动',restore:'恢复前自动'};
+async function openSnap(){ let list=[]; try{ list=await bkList(); }catch(_){}
+  $('#snapList').innerHTML = list.length ? list.map(s=>'<div class="snap-row" data-at="'+s.at+'"><div class="rt"><div class="rt-main">'+s.count+' 条</div><div class="rt-sub">'+new Date(s.at).toLocaleString()+' · '+(SNAP_REASON[s.reason]||s.reason||'')+'</div></div><button class="btn primary snap-restore">恢复</button></div>').join('')
+    : '<div class="sync-note">还没有快照。每天首次打开、每次同步前会自动留底，也可以点「现在留一份」。</div>';
+  $('#snapMask').classList.add('show'); }
+$('#snapItem').onclick=openSnap;
+$('#snapClose').onclick=()=>$('#snapMask').classList.remove('show');
+$('#snapMask').addEventListener('click',e=>{ if(e.target.id==='snapMask') e.currentTarget.classList.remove('show'); });
+$('#snapNow').onclick=async()=>{ if(!entries.length){ toast('本机没有数据，不用留'); return; } await snapshot('manual'); toast('已留一份快照'); openSnap(); };
+$('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.snap-restore'); if(!b) return;
+  const at=+b.closest('.snap-row').dataset.at; const list=await bkList(); const s=list.find(x=>x.at===at); if(!s) return;
+  if(!confirm('把这份快照（'+s.count+' 条）合并回本机？现有条目保留，快照里有、本机没有的补回来。')) return;
+  await snapshot('restore'); let n=0;
+  for(const raw of s.entries){ const e=normalize(raw); const cur=findEnt(e.id);
+    if(!cur){ entries.push(e); await put(e); n++; }
+    else if(stampOf(e)>stampOf(cur)){ Object.assign(cur,e); await put(cur); n++; } }
+  render(); $('#snapMask').classList.remove('show'); toast(n?('已恢复 '+n+' 条'):'本机已经有这些条目了'); });
+
+/* ---------- 检查更新 ---------- */
+function cmpVer(a,b){ const pa=String(a||'0').split('.').map(x=>parseInt(x,10)||0), pb=String(b||'0').split('.').map(x=>parseInt(x,10)||0);
+  for(let i=0;i<Math.max(pa.length,pb.length);i++){ const x=pa[i]||0, y=pb[i]||0; if(x!==y) return x>y?1:-1; } return 0; }
+async function hardReload(){ try{ if('serviceWorker' in navigator){ for(const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); }
+  if(window.caches){ for(const k of await caches.keys()) await caches.delete(k); } }catch(_){} location.reload(); }
+async function checkUpdate(){ toast('检查中…'); let v;
+  try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); v=await r.json(); }
+  catch(_){ toast('检查失败：拿不到版本信息（需联网）'); return; }
+  const webV=v.web||v.versionName, apkV=v.versionName; let shellV=null;
+  try{ if(window.AndroidBridge&&AndroidBridge.getVersionName) shellV=String(AndroidBridge.getVersionName()); }catch(_){}
+  if(shellV && cmpVer(apkV,shellV)>0){ if(confirm('壳 App 有新版本 v'+apkV+'（当前 v'+shellV+'），去下载安装？')){ try{ if(AndroidBridge.openUrl){ AndroidBridge.openUrl(v.apk); return; } }catch(_){} window.open(v.apk,'_blank'); } return; }
+  if(cmpVer(webV,APP_VERSION)>0){ if(confirm('有新版本 v'+webV+'（当前 v'+APP_VERSION+'），现在刷新更新？本机数据不受影响。')) await hardReload(); return; }
+  toast('已是最新（v'+APP_VERSION+(shellV?'，壳 v'+shellV:'')+'）'); }
+$('#updateItem').onclick=checkUpdate;
+$('#updateItem .mt small').textContent='当前 v'+APP_VERSION+'，点击联网检查';
 $('#importHelp').onclick=()=>$('#importHelpMask').classList.add('show');
 $('#importHelpClose').onclick=()=>$('#importHelpMask').classList.remove('show');
 $('#importHelpMask').addEventListener('click',e=>{ if(e.target.id==='importHelpMask') e.currentTarget.classList.remove('show'); });
@@ -1344,7 +1459,8 @@ render();
   render();
   if(pendingShare){ openEdit(null); $('#fTitle').value=pendingShare.title;
     $('#blocksWrap').innerHTML=''; addBlkRow(pendingShare.text); pendingShare=null; }
-  syncNow(false); // 若已配置：自动拉取最新 / 上传本地
+  snapshotDaily(); // 每天首次打开留一份本机快照
+  // 本地优先：启动只读本机库，不自动拉云端。同步靠设置里「立即同步」，或开着「改动后自动同步」时改完自动做合并同步
 }catch(err){ console.error(err); toast('本地存储打不开，请用浏览器打开本文件'); } })();
 
 /* PWA：注册 Service Worker（仅在 http/https 下生效，file:// 本地打开会自动跳过） */
