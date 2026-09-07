@@ -1127,6 +1127,7 @@ $('#tagApply').onclick=async()=>{
 $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card">
   <div class="a-title">Copie · 本地复制箱</div>
   <div class="a-row">共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。</div>
+  <div class="a-row"><b>v1.7 更新</b>：云同步改为逐条合并（不再整份覆盖），删除会同步、误删有安全阀；打开 App 只读本机，想拉云端点「立即同步」；新增本地快照、检查更新。云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
   <a class="a-lic" href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank">PolyForm Noncommercial 1.0.0</a>
@@ -1218,6 +1219,12 @@ async function decEnvelope(env,pass){
   const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToU8(env.iv)},key,b64ToU8(env.ct));
   return JSON.parse(new TextDecoder().decode(pt));
 }
+async function ghFail(step,r){ let m=''; try{ m=(await r.json()).message||''; }catch(_){}
+  const hint = r.status===401 ? 'token 无效或已过期，去 github.com/settings/tokens 重新生成'
+    : r.status===403 ? 'token 没有这个权限：fine-grained 要选 Only select repositories → copie-data，Permissions 给 Contents: Read and write'
+    : r.status===404 ? '没找到仓库 copie-data（或 token 没授权它）'
+    : '';
+  return new Error(step+'失败 HTTP '+r.status+(m?'：'+m:'')+(hint?'。'+hint:'')); }
 function contentsUrl(c){ return 'https://api.github.com/repos/'+c.repo+'/contents/'+c.path.split('/').map(encodeURIComponent).join('/'); }
 
 /* ---- 合并规则 ---- */
@@ -1234,8 +1241,7 @@ function fingerprint(list){ return list.map(e=>e.id+':'+stampOf(e)).sort().join(
 async function remotePull(c){
   const r=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c),cache:'no-store'});
   if(r.status===404) return null;
-  if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
-  if(!r.ok) throw new Error('读取失败 '+r.status);
+  if(!r.ok) throw await ghFail('读云端文件',r);
   const j=await r.json(); c._sha=j.sha; const raw=JSON.parse(b64dec(j.content));
   if(raw && raw.enc==='aesgcm'){
     const pass=getPass(); if(!pass) throw new Error('需要主密码才能解密云端数据');
@@ -1254,7 +1260,7 @@ async function remotePush(c, list, deleted){
     return fetch(contentsUrl(c),{method:'PUT',headers:ghH(c),body:JSON.stringify(body)}); };
   let p=await attempt(c._sha);
   if(p.status===409||p.status===422){ const g=await fetch(contentsUrl(c)+'?ref='+encodeURIComponent(c.branch),{headers:ghH(c),cache:'no-store'}); const sha=g.status===200?(await g.json()).sha:undefined; p=await attempt(sha); }
-  if(!p.ok) throw new Error('上传失败 '+p.status);
+  if(!p.ok) throw await ghFail('上传',p);
   const j=await p.json(); c._sha=j.content&&j.content.sha; c.lastSync=now(); saveSyncCfg(c);
 }
 /* 把合并结果写进本机库：只动有差异的条目，绝不清库 */
@@ -1270,9 +1276,8 @@ async function applyMerged(merged){
 async function ensureRepo(c){
   const r=await fetch('https://api.github.com/repos/'+c.repo,{headers:ghH(c)});
   if(r.ok) return;
-  if(r.status===404) throw new Error('没找到仓库 copie-data，请先在 GitHub 手动建一个空的私有仓库 copie-data');
-  if(r.status===401||r.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）');
-  throw new Error('检查仓库失败 '+r.status);
+  if(r.status===404) throw new Error('没找到仓库 '+c.repo+'：先在 GitHub 建一个空的私有仓库 copie-data，且 token 要授权它');
+  throw await ghFail('检查仓库',r);
 }
 
 /* 同步 = 拉云端 → 与本机逐条合并 → 有差异才写本机 / 才上传。manual=true 时会弹确认、报结果 */
@@ -1282,7 +1287,7 @@ async function syncNow(manual){
   if(manual) toast('同步中…');
   try{
     if(!c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
-      if(u.status===401||u.status===403) throw new Error('Token 无效或权限不足（需 fine-grained，只授权 copie-data 的 Contents 读写）'); if(!u.ok) throw new Error('连接失败 '+u.status);
+      if(!u.ok) throw await ghFail('验证 token',u);
       c.repo=(await u.json()).login+'/copie-data'; c.path='copie-data.json'; c.branch='main'; saveSyncCfg(c); await ensureRepo(c); }
     const remote=await remotePull(c);
     const rEntries=remote?remote.entries.map(normalize):[], rDeleted=remote?remote.deleted:{};
@@ -1374,7 +1379,7 @@ async function copyText(str){
     document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(_){} ta.remove(); }
 }
 let toastTimer; function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1500);}
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), m.length>24?6000:1500);}
 let undoTimer, pendingUndo=null;
 /* 通用撤回条：任何删除都传入 文案 + 恢复函数 */
 function showUndoBar(text, undoFn){ pendingUndo=undoFn;
