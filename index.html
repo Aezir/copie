@@ -342,6 +342,13 @@
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
   #undoBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-140%); display:flex; align-items:center; gap:12px; background:var(--accent); color:#fff; padding:10px 12px 10px 16px; border-radius:0 0 12px 12px; font-size:13.5px; z-index:200; max-width:90vw; pointer-events:none; transition:transform .28s cubic-bezier(.22,1,.36,1);}
   #undoBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto; box-shadow:0 6px 22px rgba(0,0,0,.18);}
+  #syncBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-140%); display:flex; align-items:center; gap:8px; background:var(--sheet); color:var(--muted); padding:8px 14px; border-radius:0 0 12px 12px; font-size:12.5px; z-index:60; transition:transform .28s cubic-bezier(.2,.8,.2,1); pointer-events:none; max-width:86vw; box-shadow:0 6px 22px rgba(0,0,0,.14);}
+  #syncBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  #syncBar .sync-spin{width:12px; height:12px; border:2px solid var(--divider); border-top-color:var(--accent); border-radius:50%; flex:none; display:none; animation:syncspin .8s linear infinite;}
+  #syncBar.busy .sync-spin{display:block;}
+  #syncBar.fail{color:var(--danger);}
+  #syncBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  @keyframes syncspin{to{transform:rotate(360deg);}}
   #undoBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62vw;}
   #undoBarBtn{flex:none; background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:7px; padding:5px 12px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s;}
   #undoBarBtn:hover{background:rgba(255,255,255,.32);}
@@ -421,7 +428,7 @@
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="menu-item" id="syncNowItem"><svg class="ic" viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg><div class="mt">立即同步<small>拉云端、逐条合并、再上传；不会整份覆盖</small></div></div>
-      <div class="menu-item" id="autoSyncItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C14.7486 4 17.1749 5.38626 18.6156 7.5H16V9.5H22V3.5H20V5.99936C18.1762 3.57166 15.2724 2 12 2C6.47715 2 2 6.47715 2 12H4C4 7.58172 7.58172 4 12 4ZM20 12C20 16.4183 16.4183 20 12 20C9.25144 20 6.82508 18.6137 5.38443 16.5H8V14.5H2V20.5H4V18.0006C5.82381 20.4283 8.72764 22 12 22C17.5228 22 22 17.5228 22 12H20Z"/></svg><div class="mt">改动后自动同步<small>停手 1.5 秒后自动做一次合并同步</small></div><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
+      <div class="menu-item" id="autoSyncItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C14.7486 4 17.1749 5.38626 18.6156 7.5H16V9.5H22V3.5H20V5.99936C18.1762 3.57166 15.2724 2 12 2C6.47715 2 2 6.47715 2 12H4C4 7.58172 7.58172 4 12 4ZM20 12C20 16.4183 16.4183 20 12 20C9.25144 20 6.82508 18.6137 5.38443 16.5H8V14.5H2V20.5H4V18.0006C5.82381 20.4283 8.72764 22 12 22C17.5228 22 22 17.5228 22 12H20Z"/></svg><div class="mt">自动同步<small>打开 App 时、改动停手 1.5 秒后，自动做合并同步</small></div><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
       <div class="sync-box">
         <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
         <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
@@ -567,9 +574,9 @@
         <h4>③ 同步逻辑</h4>
         <ul>
           <li><b>加密</b>：上云前用主密码把整份数据加密（AES-GCM），GitHub 上只存密文，拿到 token 或仓库也读不出内容</li>
-          <li><b>启动本地优先</b>：打开 App 只读本机数据，<b>不自动拉云端</b>；想拉就点「立即同步」</li>
+          <li><b>启动本地优先</b>：打开 App 先显示本机数据，然后顶部弹"自动同步中"，在后台逐条合并；关掉「自动同步」就只在点「立即同步」时同步</li>
           <li><b>逐条合并</b>：同一条谁改得晚用谁的；一边有另一边没有的补上；在某台设备删掉的条目会带"删除记录"，其他设备同步后也删，不靠整份覆盖</li>
-          <li><b>自动上传</b>：开着「改动后自动同步」时，停手 1.5 秒后做一次同样的合并同步；关掉就纯手动</li>
+          <li><b>自动上传</b>：开着「自动同步」时，改动停手 1.5 秒后做一次同样的合并同步；关掉就纯手动</li>
           <li><b>安全阀</b>：同步会让本机少掉一半以上条目时先问你；本机为空却要清掉云端也会先问；同步前自动留本机快照</li>
           <li>token 和主密码都只存<b>本机浏览器</b>，不进代码、不上云</li>
         </ul>
@@ -604,6 +611,7 @@
 
   <input type="file" id="fileInp" accept="application/json,.json">
   <div id="toast"></div>
+  <div id="syncBar"><span class="sync-spin"></span><span id="syncBarText">自动同步中…</span></div>
   <div id="undoBar"><span id="undoBarText"></span><button id="undoBarBtn" type="button" aria-label="撤回"><svg class="ic" viewBox="0 0 24 24"><path d="M5.82843 6.99987L8.36396 9.53539L6.94975 10.9496L2 5.99987L6.94975 1.05012L8.36396 2.46434L5.82843 4.99987H13C17.4183 4.99987 21 8.58159 21 12.9999C21 17.4182 17.4183 20.9999 13 20.9999H4V18.9999H13C16.3137 18.9999 19 16.3136 19 12.9999C19 9.68616 16.3137 6.99987 13 6.99987H5.82843Z"/></svg></button></div>
 </div>
 
@@ -1144,7 +1152,7 @@ $('#tagApply').onclick=async()=>{
 $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card">
   <div class="a-title">Copie · 本地复制箱</div>
   <div class="a-row">共 ${entries.length} 条记录，数据存在本机浏览器，请常用「导出」备份。</div>
-  <div class="a-row"><b>v1.7 更新</b>：云同步改为逐条合并（不再整份覆盖），删除会同步、误删有安全阀；打开 App 只读本机，想拉云端点「立即同步」；新增本地快照、检查更新。云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
+  <div class="a-row"><b>v1.7 更新</b>：云同步改为逐条合并（不再整份覆盖），删除会同步、误删有安全阀；打开 App 先显示本机数据、再后台自动同步（顶部有提示）；新增本地快照、检查更新。云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
   <a class="a-dl" id="aboutDlCard" href="https://copwe.netlify.app/copie-1.6.apk" target="_blank">
@@ -1221,7 +1229,7 @@ function autoSyncOn(){ return loadSync().auto!==false; }
 function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||'';
   if($('#autoSyncToggle')) $('#autoSyncToggle').checked=autoSyncOn(); updateSyncNote(); }
 function updateSyncNote(){ const c=loadSync(), el=$('#syncNote'); if(!el) return;
-  if(c.token){ el.innerHTML='<svg style="width:14px;height:14px;vertical-align:middle;fill:var(--ok);margin-right:4px;margin-top:-2px" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"/></svg><span style="color:var(--ok)">已连接</span>'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 只读本机数据，不自动拉云端；点上面「立即同步」做逐条合并。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
+  if(c.token){ el.innerHTML='<svg style="width:14px;height:14px;vertical-align:middle;fill:var(--ok);margin-right:4px;margin-top:-2px" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"/></svg><span style="color:var(--ok)">已连接</span>'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 先显示本机数据，再在后台自动逐条合并（顶部会提示）；也可随时点上面「立即同步」。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
   else{ el.innerHTML='先在 GitHub 手动建一个<b>私有</b>仓库 <code>copie-data</code>，再生成 <b>fine-grained</b> token（只授权这一个仓库、Contents 读写），连同一个<b>主密码</b>一起填。数据会<b>加密</b>后才上云；Token 与主密码都<b>只存本机浏览器</b>，不进代码、不上云。'; }
 }
 function ghH(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
@@ -1312,8 +1320,8 @@ async function ensureRepo(c){
 
 /* 同步 = 拉云端 → 与本机逐条合并 → 有差异才写本机 / 才上传。manual=true 时会弹确认、报结果 */
 async function syncNow(manual){
-  const c=loadSync(); if(!c.token){ if(manual) toast('先在下面填 token 和主密码'); return; }
-  if(syncing){ if(manual) toast('正在同步…'); return; } syncing=true;
+  const c=loadSync(); if(!c.token){ if(manual) toast('先在下面填 token 和主密码'); return {skip:true}; }
+  if(syncing){ if(manual) toast('正在同步…'); return {skip:true}; } syncing=true;
   if(manual) toast('同步中…');
   try{
     if(!c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
@@ -1327,13 +1335,13 @@ async function syncNow(manual){
     const lost=entries.filter(e=>!mergedIds.has(e.id)).length;
     /* 安全阀 1：本机会少掉 ≥3 条且超过一半 → 自动同步直接放弃；手动同步先问 */
     if(lost>=3 && lost>entries.length/2){
-      if(!manual){ c.lastErr='合并会删掉本机 '+lost+' 条，已跳过自动同步，请手动确认'; saveSyncCfg(c); updateSyncNote(); return; }
-      if(!confirm('合并后会从本机删掉 '+lost+' 条（在其他设备上删除过的）。\n继续前会自动留一份本机快照，可在「本地快照」里恢复。\n确定继续？')){ toast('已取消'); return; }
+      if(!manual){ c.lastErr='合并会删掉本机 '+lost+' 条，已跳过自动同步，请手动确认'; saveSyncCfg(c); updateSyncNote(); return {ok:false,msg:c.lastErr}; }
+      if(!confirm('合并后会从本机删掉 '+lost+' 条（在其他设备上删除过的）。\n继续前会自动留一份本机快照，可在「本地快照」里恢复。\n确定继续？')){ toast('已取消'); return {ok:false,msg:'已取消'}; }
     }
     /* 安全阀 2：本机合并后为空、云端却有数据 → 绝不悄悄清云端 */
     if(!merged.length && rEntries.length){
-      if(!manual){ c.lastErr='本机为空而云端有 '+rEntries.length+' 条，已拒绝自动上传'; saveSyncCfg(c); updateSyncNote(); return; }
-      if(!confirm('云端有 '+rEntries.length+' 条，本机合并后是空的。\n继续会把云端也清空（仓库历史仍可找回）。确定？')){ toast('已取消'); return; }
+      if(!manual){ c.lastErr='本机为空而云端有 '+rEntries.length+' 条，已拒绝自动上传'; saveSyncCfg(c); updateSyncNote(); return {ok:false,msg:c.lastErr}; }
+      if(!confirm('云端有 '+rEntries.length+' 条，本机合并后是空的。\n继续会把云端也清空（仓库历史仍可找回）。确定？')){ toast('已取消'); return {ok:false,msg:'已取消'}; }
     }
     const localChanged=fingerprint(merged)!==fingerprint(entries);
     const remoteChanged=!remote || fingerprint(merged)!==fingerprint(rEntries) || JSON.stringify(tomb)!==JSON.stringify(rDeleted||{});
@@ -1342,10 +1350,24 @@ async function syncNow(manual){
     if(remoteChanged){ c.savedAt=now(); saveSyncCfg(c); await remotePush(c, merged, tomb); }
     c.linked=true; c.lastSync=now(); delete c.lastErr; saveSyncCfg(c); updateSyncNote();
     if(manual) toast((localChanged||remoteChanged)?('已同步，本机 '+merged.length+' 条'):'已是最新');
+    return {ok:true, changed:localChanged||remoteChanged, count:merged.length};
   }catch(err){ const msg=String(err.message||err); const cc=loadSync(); cc.lastErr=msg; saveSyncCfg(cc); updateSyncNote();
-    if(manual) toast(msg); else console.warn('sync:',err); }
+    if(manual) toast(msg); else console.warn('sync:',err); return {ok:false,msg}; }
   finally{ syncing=false; }
 }
+/* 顶部同步条 */
+let syncBarTimer=null;
+function showSyncBar(text,busy,fail){ const b=$('#syncBar'); $('#syncBarText').textContent=text; b.classList.toggle('busy',!!busy); b.classList.toggle('fail',!!fail); b.classList.add('show'); clearTimeout(syncBarTimer); }
+function hideSyncBar(delay){ clearTimeout(syncBarTimer); syncBarTimer=setTimeout(()=>$('#syncBar').classList.remove('show'),delay||0); }
+$('#syncBar').onclick=()=>{ hideSyncBar(0); if($('#syncBar').classList.contains('fail')) $('#settingsBtn').click(); };
+/* 启动自动同步：本机数据已经显示出来之后，在后台拉云端逐条合并，顶部横幅报进度 */
+async function bootSync(){ const c=loadSync(); if(!c.token||!autoSyncOn()) return;
+  showSyncBar('自动同步中…',true);
+  const r=await syncNow(false);
+  if(!r||r.skip){ hideSyncBar(0); return; }
+  if(r.ok){ showSyncBar(r.changed?('已同步 · 本机 '+r.count+' 条'):'已是最新',false); hideSyncBar(1800); }
+  else{ showSyncBar('同步失败：'+r.msg+'（点这里去设置）',false,true); hideSyncBar(8000); } }
+
 /* 任何本地数据写入后：记时间；若开了自动同步则防抖 1.5s 做一次合并同步 */
 function touched(){ if(applyingRemote) return; const c=loadSync(); if(!c.token) return;
   c.savedAt=now(); saveSyncCfg(c);
@@ -1358,7 +1380,7 @@ $('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); con
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
 $('#syncNowItem').onclick=()=>syncNow(true);
 $('#autoSyncItem').addEventListener('click',e=>{ if(e.target.closest('.switch')) return; const cb=$('#autoSyncToggle'); cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); });
-$('#autoSyncToggle').onchange=e=>{ const c=loadSync(); c.auto=!!e.target.checked; saveSyncCfg(c); toast(c.auto?'改动后会自动同步':'已改为纯手动同步'); };
+$('#autoSyncToggle').onchange=e=>{ const c=loadSync(); c.auto=!!e.target.checked; saveSyncCfg(c); toast(c.auto?'打开和改动后都会自动同步':'已改为纯手动同步'); };
 
 /* ---------- 本地快照：查看 / 恢复 / 手动留底 ---------- */
 const SNAP_REASON={sync:'同步前自动',daily:'每日自动',manual:'手动',restore:'恢复前自动'};
@@ -1386,7 +1408,7 @@ const CHANGELOG=[
     '删除通过"删除记录"同步到其他设备；撤回后会复活',
     '两道安全阀：合并会让本机少掉一半以上、或本机为空却要清云端时，自动同步拒绝、手动先确认',
     '本地快照：每天首次打开、每次同步前自动留底，设置里可查看和恢复',
-    '打开 App 只读本机数据，不再自动拉云端；新增「立即同步」和「改动后自动同步」开关',
+    '打开 App 先显示本机数据，再在后台自动同步并在顶部提示；新增「立即同步」和「自动同步」开关',
     '新增「检查软件更新」和这份更新日志',
     '同步报错会带步骤、状态码和 GitHub 原话，方便排查',
     '修复：某台设备本机库为空时会把空数据推上云、其他设备跟着清空的事故',
@@ -1528,7 +1550,7 @@ render();
   if(pendingShare){ openEdit(null); $('#fTitle').value=pendingShare.title;
     $('#blocksWrap').innerHTML=''; addBlkRow(pendingShare.text); pendingShare=null; }
   snapshotDaily(); // 每天首次打开留一份本机快照
-  // 本地优先：启动只读本机库，不自动拉云端。同步靠设置里「立即同步」，或开着「改动后自动同步」时改完自动做合并同步
+  bootSync(); // 本地优先：本机数据先显示，然后顶部弹"自动同步中"，后台逐条合并（开着「自动同步」才跑）
 }catch(err){ console.error(err); toast('本地存储打不开，请用浏览器打开本文件'); } })();
 
 /* PWA：注册 Service Worker（仅在 http/https 下生效，file:// 本地打开会自动跳过） */

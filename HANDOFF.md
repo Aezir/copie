@@ -50,9 +50,9 @@
 - 编辑用**居中弹框**（非底部 sheet）。
 
 ## 七、云同步逻辑（关键，2026-09-07 重写）
-- 配置存 `localStorage['copie.sync']`：`{token, pass, repo, path:'copie-data.json', branch:'main', auto, savedAt, lastSync, lastErr, _sha}`。`auto!==false` 即"改动后自动同步"开着。
+- 配置存 `localStorage['copie.sync']`：`{token, pass, repo, path:'copie-data.json', branch:'main', auto, savedAt, lastSync, lastErr, _sha}`。`auto!==false` 即"自动同步"开着（启动时 + 改动后）。
 - 数据存私有仓库 `<GitHub用户名>/copie-data` 的 `copie-data.json`，GitHub Contents API。payload `version:4`：`{app, version, savedAt, count, enc, kdf, iv, ct}`，密文里是 `{entries, deleted}`（deleted = 墓碑表）。
-- **启动本地优先**：打开只读 IndexedDB，**不自动拉云端**（`syncNow` 不在启动时调）。每天首次打开自动留一份快照。
+- **启动本地优先**：先读 IndexedDB 渲染，再 `bootSync()`：顶部横幅 `#syncBar` 显示"自动同步中…"，后台 `syncNow(false)` 逐条合并，完成后横幅显示结果（失败点横幅进设置）。只在 `auto!==false` 时跑。每天首次打开自动留一份快照。
 - **同步 = 逐条合并**（`syncNow(manual)`）：拉云端 → `mergeSets(本机, 云端, 合并后的墓碑)`：同 id 取 `syncAt` 晚者；一边独有的补上；墓碑时间 ≥ 条目 `syncAt` 则删。有差异才写本机（`applyMerged` 只 put/del 差异条，**绝不 clear 库**）、才上传。
 - **触发**：设置页「立即同步」（manual=true，会弹确认、报结果）；开着自动同步时任何 `put/del` 后 `touched()` 防抖 1.5s 调 `syncNow(false)`。
 - **安全阀**：① 合并会让本机少 ≥3 条且超过一半 → 自动同步直接跳过并记 `lastErr`，手动先 confirm；② 本机合并后为空而云端有数据 → 自动拒绝上传，手动先 confirm。写本机前自动留 `sync` 快照。
