@@ -1,0 +1,7 @@
+# Vercel 不需要的文件（APK 走 Netlify 下载；被 Vercel 风控拦过）
+*.apk
+.netlify
+netlify.toml
+HANDOFF.md
+README.md
+LICENSE

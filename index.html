@@ -457,7 +457,7 @@
         <div class="bubble-row"><span>Token（估算）</span><label class="switch"><input type="checkbox" id="metaTokens"><span class="track"></span></label></div>
       </div>
 
-      <div class="sec-label">更新</div>
+      <div class="sec-label sync-hd">更新<button class="help-btn" id="changelogBtn" aria-label="更新日志"><svg class="ic" viewBox="0 0 24 24"><path d="M19 22H5C3.34315 22 2 20.6569 2 19V3C2 2.44772 2.44772 2 3 2H17C17.5523 2 18 2.44772 18 3V15H22V19C22 20.6569 20.6569 22 19 22ZM18 17V19C18 19.5523 18.4477 20 19 20C19.5523 20 20 19.5523 20 19V17H18ZM16 20V4H4V19C4 19.5523 4.44772 20 5 20H16ZM6 7H14V9H6V7ZM6 11H14V13H6V11ZM6 15H11V17H6V15Z"/></svg></button></div>
       <div class="menu-item" id="updateItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 13V18.585L14.8284 16.7574L16.2426 18.1716L12 22.4142L7.75736 18.1716L9.17157 16.7574L11 18.585V13H13ZM12 2C15.5934 2 18.5544 4.70761 18.9541 8.19395C21.2858 8.83154 23 10.9656 23 13.5C23 16.3688 20.8036 18.7246 18.0006 18.9776L18.0009 16.9644C19.6966 16.7214 21 15.2629 21 13.5C21 11.567 19.433 10 17.5 10C17.2912 10 17.0867 10.0183 16.8887 10.054C16.9616 9.7142 17 9.36158 17 9C17 6.23858 14.7614 4 12 4C9.23858 4 7 6.23858 7 9C7 9.36158 7.03838 9.7142 7.11205 10.0533C6.91331 10.0183 6.70879 10 6.5 10C4.567 10 3 11.567 3 13.5C3 15.2003 4.21241 16.6174 5.81986 16.934L6.00005 16.9646L6.00039 18.9776C3.19696 18.7252 1 16.3692 1 13.5C1 10.9656 2.71424 8.83154 5.04648 8.19411C5.44561 4.70761 8.40661 2 12 2Z"/></svg><div class="mt">检查软件更新<small>点击联网检查</small></div></div>
 
       <div class="sec-label">关于</div>
@@ -577,6 +577,16 @@
         <h4>注意</h4>
         <div class="tip">• <b>主密码丢了，云端数据永远解不开</b>——请务必记牢（本地 App 里的数据不受影响）<br>• token 只授权 copie-data 这一个仓，泄露了也碰不到你别的仓库；建议设过期、定期换<br>• 要联网、在网址(https)下才通<br>• 云端仓库 copie-data 每次上传都是一次 git 提交，历史都在，误删也能从旧提交里找回<br>• 别人的改动是"打开 App 那下"才拉取，不是实时对推</div>
       </div>
+    </div>
+  </div>
+
+  <div class="sheet-mask" id="logMask">
+    <div class="sheet">
+      <div class="help-head">
+        <h2>更新日志</h2>
+        <button class="ghost-ico" id="logClose" aria-label="关闭"><svg class="ic" viewBox="0 0 24 24"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/></svg></button>
+      </div>
+      <div class="help-body" id="logBody"></div>
     </div>
   </div>
 
@@ -1368,6 +1378,38 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
     if(!cur){ entries.push(e); await put(e); n++; }
     else if(stampOf(e)>stampOf(cur)){ Object.assign(cur,e); await put(cur); n++; } }
   render(); $('#snapMask').classList.remove('show'); toast(n?('已恢复 '+n+' 条'):'本机已经有这些条目了'); });
+
+/* ---------- 更新日志（每次发版在最前面加一条） ---------- */
+const CHANGELOG=[
+  {v:'1.7', d:'2026-09-07', items:[
+    '云同步改为<b>逐条合并</b>：同一条谁改得晚用谁的，两边各自新增的都保留，不再整份覆盖',
+    '删除通过"删除记录"同步到其他设备；撤回后会复活',
+    '两道安全阀：合并会让本机少掉一半以上、或本机为空却要清云端时，自动同步拒绝、手动先确认',
+    '本地快照：每天首次打开、每次同步前自动留底，设置里可查看和恢复',
+    '打开 App 只读本机数据，不再自动拉云端；新增「立即同步」和「改动后自动同步」开关',
+    '新增「检查软件更新」和这份更新日志',
+    '同步报错会带步骤、状态码和 GitHub 原话，方便排查',
+    '修复：某台设备本机库为空时会把空数据推上云、其他设备跟着清空的事故',
+  ]},
+  {v:'1.6', d:'2026-08-26', items:[
+    '云同步改端到端加密（主密码 + AES-GCM），配 fine-grained token',
+    '悬浮球壳 App：吸附、长按拎起甩飞、隐私覆盖、深浅主题跟随、自动检查更新',
+    '全删除可撤回、隐私模式（子条目打码）、粉嫩主题、自定义取色盘',
+    '导入增强 + AI 引导、壳内导出写入系统下载文件夹',
+    '图标升级为自适应图标（粉底白卡）',
+    'Service Worker 改网络优先，打开即最新',
+  ]},
+  {v:'早期', d:'2026-08-25', items:[
+    '本地复制箱首版：条目 + 文本块、标签、置顶收藏、左滑手势、多选批量',
+    '封装为 PWA，响应式适配手机/电脑',
+    'GitHub 私有仓云同步（一个 token、改动自动上传）+ 教程弹窗',
+    'Netlify 持续部署',
+  ]},
+];
+function openChangelog(){ $('#logBody').innerHTML=CHANGELOG.map(c=>`<h4>${/^d/.test(c.v)?'v':''}${c.v} <span style="font-weight:400;color:var(--faint)">· ${c.d}</span></h4><ul>${c.items.map(i=>'<li>'+i+'</li>').join('')}</ul>`).join(''); $('#logMask').classList.add('show'); }
+$('#changelogBtn').onclick=openChangelog;
+$('#logClose').onclick=()=>$('#logMask').classList.remove('show');
+$('#logMask').addEventListener('click',e=>{ if(e.target.id==='logMask') e.currentTarget.classList.remove('show'); });
 
 /* ---------- 检查更新 ---------- */
 function cmpVer(a,b){ const pa=String(a||'0').split('.').map(x=>parseInt(x,10)||0), pb=String(b||'0').split('.').map(x=>parseInt(x,10)||0);
