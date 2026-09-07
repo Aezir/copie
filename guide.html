@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Copie 使用教程</title>
+<style>
+:root{
+  --accent:#ff9292;
+  --bg:#fff; --text:#37352f; --muted:rgba(55,53,47,.55); --faint:rgba(55,53,47,.35);
+  --hover:rgba(55,53,47,.05); --divider:rgba(55,53,47,.09); --field:rgba(55,53,47,.045);
+  --sheet:#fff;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#191919; --text:rgba(255,255,255,.82); --muted:rgba(255,255,255,.45); --faint:rgba(255,255,255,.3);
+    --hover:rgba(255,255,255,.055); --divider:rgba(255,255,255,.09); --field:rgba(255,255,255,.055);
+    --sheet:#252525;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Variable","Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+body{display:flex;justify-content:center;padding:0 0 80px;}
+.wrap{width:100%;max-width:480px;padding:0 20px;}
+
+/* 顶部 */
+.top{padding:28px 0 8px;display:flex;align-items:center;gap:10px;}
+.back-btn{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-size:14px;text-decoration:none;border:none;background:none;cursor:pointer;padding:4px 0;}
+.back-btn svg{width:18px;height:18px;fill:currentColor;}
+h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em;}
+.subtitle{color:var(--muted);font-size:13.5px;margin:0 0 28px;}
+
+/* 章节 */
+.ch{margin-bottom:28px;}
+.ch-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ch-icon{width:32px;height:32px;border-radius:8px;background:var(--field);display:flex;align-items:center;justify-content:center;flex:none;}
+.ch-icon svg{width:17px;height:17px;fill:var(--accent);}
+.ch-title{font-size:15.5px;font-weight:650;letter-spacing:-.01em;}
+.ch-body{padding-left:40px;}
+.ch-body p{margin:4px 0 8px;color:var(--muted);font-size:14px;line-height:1.7;}
+.ch-body ul,.ch-body ol{margin:4px 0 10px;padding-left:17px;color:var(--muted);font-size:14px;line-height:1.7;}
+.ch-body li{margin:4px 0;}
+.ch-body b{color:var(--text);}
+.ch-body code{background:var(--field);border-radius:4px;padding:1px 5px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;}
+
+/* 提示块 */
+.tip{background:rgba(255,146,146,.1);border-radius:8px;padding:10px 14px;margin:8px 0 10px;font-size:13.5px;color:var(--text);line-height:1.7;}
+.tip b{color:var(--accent);}
+
+/* 分隔线 */
+hr{border:none;border-top:1px solid var(--divider);margin:24px 0;}
+
+/* 下载卡 */
+.dl-card{display:flex;align-items:center;gap:14px;background:var(--field);border-radius:12px;padding:14px 16px;margin-bottom:28px;text-decoration:none;color:inherit;transition:background .15s;}
+.dl-card:hover{background:var(--hover2, rgba(55,53,47,.09));}
+.dl-icon{width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;}
+.dl-icon svg{width:22px;height:22px;fill:#fff;}
+.dl-info{flex:1;min-width:0;}
+.dl-name{font-size:14.5px;font-weight:650;letter-spacing:-.01em;}
+.dl-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.dl-arrow{flex:none;color:var(--faint);}
+.dl-arrow svg{width:18px;height:18px;fill:currentColor;}
+
+/* App 专属标签 */
+.app-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--accent);background:rgba(255,146,146,.13);border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:middle;}
+
+/* 操作卡片（手势说明） */
+.gesture-list{display:flex;flex-direction:column;gap:1px;border-radius:10px;overflow:hidden;background:var(--field);margin:6px 0 10px;}
+.gesture-row{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--bg);}
+.gesture-row:not(:last-child){border-bottom:1px solid var(--divider);}
+.g-key{flex:none;min-width:76px;font-size:12.5px;font-weight:600;color:var(--text);padding-top:1px;}
+.g-val{font-size:13.5px;color:var(--muted);line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+  <a class="back-btn" href="javascript:history.back()">
+    <svg viewBox="0 0 24 24"><path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z"/></svg>
+    返回
+  </a>
+</div>
+
+<h1>Copie 使用教程</h1>
+<p class="subtitle">全功能速览，从基础到进阶。</p>
+
+<!-- 1. 笔记管理 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg></div>
+    <div class="ch-title">笔记管理</div>
+  </div>
+  <div class="ch-body">
+    <p>Copie 的基本单位是「笔记」，每条笔记有一个标题和若干文本块。</p>
+    <div class="gesture-list">
+      <div class="gesture-row"><div class="g-key">新建</div><div class="g-val">点右上角 <b>+</b> 按钮</div></div>
+      <div class="gesture-row"><div class="g-key">改标题</div><div class="g-val">直接点笔记列表里的<b>标题文字</b>，弹出编辑面板后修改</div></div>
+      <div class="gesture-row"><div class="g-key">删除</div><div class="g-val">左滑条目，点红色<b>删除</b>图标；删后底部弹「撤销」可恢复</div></div>
+      <div class="gesture-row"><div class="g-key">收藏 / 置顶</div><div class="g-val">左滑条目，点星号（收藏）或图钉（置顶）</div></div>
+      <div class="gesture-row"><div class="g-key">多选</div><div class="g-val">长按任意条目进入多选模式，顶部出现批量操作栏</div></div>
+      <div class="gesture-row"><div class="g-key">搜索</div><div class="g-val">顶部搜索框，同时搜标题和文本块内容</div></div>
+    </div>
+    <div class="tip"><b>撤销删除：</b>无论单条还是批量删除，底部都会出现「撤销」提示，5 秒内可点击恢复。</div>
+  </div>
+</div>
+
+<!-- 2. 文本块 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M3 4H21V6H3V4ZM3 19H17V21H3V19ZM3 14H21V16H3V14ZM3 9H17V11H3V9Z"/></svg></div>
+    <div class="ch-title">文本块</div>
+  </div>
+  <div class="ch-body">
+    <p>一条笔记里可以有多个文本块，适合存密码、代码片段、地址等不同类型的内容。</p>
+    <div class="gesture-list">
+      <div class="gesture-row"><div class="g-key">添加块</div><div class="g-val">打开笔记编辑面板，点底部「<b>添加文本块</b>」</div></div>
+      <div class="gesture-row"><div class="g-key">复制块</div><div class="g-val">点条目展开后，点每个块右侧的<b>复制</b>图标</div></div>
+      <div class="gesture-row"><div class="g-key">删除块</div><div class="g-val">展开后左滑文本块，点红色<b>删除</b>图标；支持撤销</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 代码高亮 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M23 12L15.9289 19.0711L14.5147 17.6569L20.1716 12L14.5147 6.34317L15.9289 4.92896L23 12ZM3.82843 12L9.48528 17.6569L8.07107 19.0711L1 12L8.07107 4.92896L9.48528 6.34317L3.82843 12Z"/></svg></div>
+    <div class="ch-title">代码高亮</div>
+  </div>
+  <div class="ch-body">
+    <p>文本块内容会自动识别代码并着色，支持字符串、数字、关键词、注释、URL 等类型。</p>
+    <ul>
+      <li>在「设置 → 显示 → 代码高亮」中开关</li>
+      <li>开启后，<b>编辑时</b>底层实时着色，光标位置仍可正常输入中文</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 4. 隐私模式 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M17.8827 19.2968C16.1814 20.3755 14.1638 21.0002 12.0003 21.0002C6.60812 21.0002 2.12215 17.1204 1.18164 12.0002C1.61832 9.62283 2.81932 7.5129 4.52047 5.93457L1.39366 2.80777L2.80788 1.39355L22.6069 21.1925L21.1927 22.6068L17.8827 19.2968ZM5.9356 7.3497C4.60673 8.56015 3.6378 10.1672 3.22278 12.0002C4.14022 16.0521 7.7646 19.0002 12.0003 19.0002C13.5997 19.0002 15.0963 18.5798 16.3884 17.8384L14.2417 15.6917C13.5972 16.1274 12.8272 16.3859 11.9997 16.3859C9.79053 16.3859 7.99969 14.595 7.99969 12.3859C7.99969 11.5584 8.2582 10.7884 8.69387 10.1439L5.9356 7.3497ZM12.9139 14.328L9.67246 11.0866C9.5613 11.4902 9.49969 11.9156 9.49969 12.3859C9.49969 13.7666 10.619 14.8859 11.9997 14.8859C12.47 14.8859 12.8954 14.8243 13.299 14.7131L12.9139 14.328ZM20.8068 16.5925L19.376 15.1617C20.0319 14.2268 20.5154 13.158 20.778 12.0002C19.8606 7.94818 16.2362 5.00016 12.0003 5.00016C11.1544 5.00016 10.3329 5.11773 9.55527 5.33818L7.97506 3.75797C9.22152 3.26915 10.5793 3.00016 12.0003 3.00016C17.3924 3.00016 21.8784 6.87993 22.819 12.0002C22.5067 13.6998 21.8038 15.2628 20.8068 16.5925ZM11.7952 7.50586C11.862 7.50195 11.9291 7.5 11.9972 7.5C14.2063 7.5 15.9972 9.29086 15.9972 11.5C15.9972 11.5681 15.9952 11.6352 15.9913 11.702L11.7952 7.50586Z"/></svg></div>
+    <div class="ch-title">隐私模式</div>
+  </div>
+  <div class="ch-body">
+    <p>开启后，列表里每个文本块的内容都会打码——只显示前 4 个字符和后 4 个字符，中间替换为 ••••。</p>
+    <ul>
+      <li>在「设置 → 显示 → 隐私模式」中开关</li>
+      <li>打码仅影响<b>显示</b>，复制、导出的内容仍是原文</li>
+      <li>内容不足 8 字符时不打码，避免泄漏长度信息</li>
+    </ul>
+    <div class="tip">适合在人多或截图时打开，拍屏看不到真实内容。</div>
+  </div>
+</div>
+
+<!-- 5. 标题栏元信息 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 7V13H17V11H13V7H11Z"/></svg></div>
+    <div class="ch-title">标题栏元信息</div>
+  </div>
+  <div class="ch-body">
+    <p>每条笔记标题旁可以显示小标签：创建/修改时间、字数、Token 估算值（供 AI 参考用量）。</p>
+    <ul>
+      <li>在「设置 → 标题栏显示」中逐项开关</li>
+      <li>Token 按约 3.5 字符 / token 估算，仅供参考</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 6. 主题定制 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C12.5523 22 13 21.5523 13 21C13 20.7461 12.9013 20.5166 12.7441 20.3457C12.5925 20.1811 12.5 19.9619 12.5 19.7222C12.5 19.1699 12.9477 18.7222 13.5 18.7222H14.9997C18.3134 18.7222 21 16.0356 21 12.7222C21 6.92802 17.0503 2 12 2ZM6.5 13C5.67157 13 5 12.3284 5 11.5C5 10.6716 5.67157 10 6.5 10C7.32843 10 8 10.6716 8 11.5C8 12.3284 7.32843 13 6.5 13ZM9.5 9C8.67157 9 8 8.32843 8 7.5C8 6.67157 8.67157 6 9.5 6C10.3284 6 11 6.67157 11 7.5C11 8.32843 10.3284 9 9.5 9ZM14.5 9C13.6716 9 13 8.32843 13 7.5C13 6.67157 13.6716 6 14.5 6C15.3284 6 16 6.67157 16 7.5C16 8.32843 15.3284 9 14.5 9ZM17.5 13C16.6716 13 16 12.3284 16 11.5C16 10.6716 16.6716 10 17.5 10C18.3284 10 19 10.6716 19 11.5C19 12.3284 18.3284 13 17.5 13Z"/></svg></div>
+    <div class="ch-title">主题定制</div>
+  </div>
+  <div class="ch-body">
+    <p>外观设置在「设置 → 主题」中，随时可改。</p>
+    <div class="gesture-list">
+      <div class="gesture-row"><div class="g-key">外观模式</div><div class="g-val">日间 / 夜间 / 跟随系统，三选一</div></div>
+      <div class="gesture-row"><div class="g-key">主题色</div><div class="g-val">从预设色块中选，或点「自定义」打开取色盘自定义</div></div>
+      <div class="gesture-row"><div class="g-key">背景色</div><div class="g-val">同上，影响整个页面底色</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. 数据备份与导入 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg></div>
+    <div class="ch-title">数据备份与导入</div>
+  </div>
+  <div class="ch-body">
+    <p>所有数据默认只存在本机浏览器（IndexedDB），建议定期手动导出备份。</p>
+    <div class="gesture-list">
+      <div class="gesture-row"><div class="g-key">导出</div><div class="g-val">「设置 → 导出全部」，保存为 <code>.json</code> 文件；App 内存至「下载」文件夹</div></div>
+      <div class="gesture-row"><div class="g-key">导入文件</div><div class="g-val">「设置 → 导入文件」，选 JSON 文件，合并入库，不覆盖现有数据</div></div>
+      <div class="gesture-row"><div class="g-key">剪贴板导入</div><div class="g-val">复制 JSON 文本后，点「从剪贴板导入」</div></div>
+      <div class="gesture-row"><div class="g-key">复制全部</div><div class="g-val">将全部数据以 JSON 格式复制到剪贴板，方便粘贴到别处</div></div>
+    </div>
+    <div class="tip"><b>数据格式：</b>导出的 JSON 可直接重新导入，也可粘贴给 AI 请求格式转换后再导入。导入旁的 <b>?</b> 按钮有 AI 提示词参考。</div>
+  </div>
+</div>
+
+<!-- 8. 云同步 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M17 8C17 5.23858 14.7614 3 12 3C9.59262 3 7.58747 4.67035 7.10002 6.93369C5.31699 7.30492 4 8.93048 4 10.8571C4 13.1429 5.87143 15 8.14286 15H17C19.2091 15 21 13.2091 21 11C21 8.79086 19.2091 7 17 7C17 7.33325 17 7.66675 17 8ZM12 17L8 13H11V10H13V13H16L12 17Z"/></svg></div>
+    <div class="ch-title">云同步（端对端加密）</div>
+  </div>
+  <div class="ch-body">
+    <p>通过你自己的 GitHub 私有仓库同步，数据在设备上加密后才上传，GitHub 看不到明文。</p>
+    <p><b>一次性配置步骤：</b></p>
+    <ol>
+      <li>在 GitHub 里新建一个私有仓库，命名为 <code>copie-data</code></li>
+      <li>生成一个「fine-grained」个人 token，只授权 <code>copie-data</code> 仓库的 Contents 读写权限</li>
+      <li>在「设置 → 云同步」粘贴 token，设置主密码（换设备时填同一个，丢了数据解不开）</li>
+      <li>点「连接并同步」</li>
+    </ol>
+    <div class="tip"><b>换设备：</b>填同一个 token 和同一个主密码，点「连接并同步」即可把数据拉过来。</div>
+    <div class="tip"><b>隐私：</b>加密采用 PBKDF2（210 000 次迭代）+ AES-GCM，只有你的密码能解开。</div>
+  </div>
+</div>
+
+<hr>
+
+<a class="dl-card" id="dlCard" href="https://copwe.netlify.app/copie-1.6.apk">
+  <div class="dl-icon">
+    <svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg>
+  </div>
+  <div class="dl-info">
+    <div class="dl-name">下载 Android App</div>
+    <div class="dl-sub" id="dlSub">Copie · 版本载入中…</div>
+  </div>
+  <div class="dl-arrow"><svg viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></div>
+</a>
+
+<script>
+(function(){
+  fetch('https://copwe.netlify.app/version.json?t='+Date.now())
+    .then(r=>r.json())
+    .then(function(d){
+      var card=document.getElementById('dlCard');
+      var sub=document.getElementById('dlSub');
+      if(d.apk) card.href=d.apk;
+      var fname=d.apk?d.apk.split('/').pop():'copie.apk';
+      sub.textContent='Copie v'+(d.versionName||'')+'  ·  '+fname;
+    })
+    .catch(function(){ document.getElementById('dlSub').textContent='Copie Android App'; });
+})();
+</script>
+
+<!-- 9. 悬浮球（App 专属） -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2Z"/></svg></div>
+    <div class="ch-title">悬浮球 <span class="app-tag">仅 App</span></div>
+  </div>
+  <div class="ch-body">
+    <p>悬浮球是一个可以常驻在所有应用上层的小按钮，点击可快速打开 Copie。</p>
+    <ul>
+      <li>首次打开 App 会请求「显示在其他应用上层」权限，允许后悬浮球自动出现</li>
+      <li>「设置 → 悬浮球 → 显示悬浮球」开关控制显示 / 隐藏</li>
+      <li>拖动滑块调整悬浮球大小（36–76 dp）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 10. 悬浮横条（App 专属） -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"/></svg></div>
+    <div class="ch-title">悬浮横条 <span class="app-tag">仅 App</span></div>
+  </div>
+  <div class="ch-body">
+    <p>在 Copie 里，把任意笔记条目长按并拖出去，就能让它以「横条」的形式悬浮在所有应用上方，方便在别的 App 里来回复制内容。</p>
+    <div class="gesture-list">
+      <div class="gesture-row"><div class="g-key">拎出</div><div class="g-val">在笔记列表里<b>长按</b>一个条目，原卡变半透明，拖到屏幕边缘松手即创建悬浮横条</div></div>
+      <div class="gesture-row"><div class="g-key">吸附合并</div><div class="g-val">把一个横条拖近另一个，它们会自动吸附并叠成一叠</div></div>
+      <div class="gesture-row"><div class="g-key">拆开</div><div class="g-val">长按叠中的一张卡，拖到空处松手，可以单独分离出来</div></div>
+      <div class="gesture-row"><div class="g-key">取消拎出</div><div class="g-val">长按拖起后，放回原位或在空处松手不动，原卡自动恢复</div></div>
+      <div class="gesture-row"><div class="g-key">复制</div><div class="g-val">点横条上任意文本块旁的复制图标，内容进剪贴板</div></div>
+    </div>
+    <div class="tip">隐私模式同样适用于悬浮横条——开启后横条里的文字也会打码，但复制仍是原文。</div>
+  </div>
+</div>
+
+<!-- 11. 自动更新检测 -->
+<div class="ch">
+  <div class="ch-head">
+    <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.23815L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.81078 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7619L18.5374 19.5674Z"/></svg></div>
+    <div class="ch-title">自动更新检测 <span class="app-tag">仅 App</span></div>
+  </div>
+  <div class="ch-body">
+    <p>App 每次启动时会联网检查新版本。如果有壳（原生层）更新，会弹窗提示下载。</p>
+    <ul>
+      <li>弹窗会明确显示文件名（如 <code>copie-1.6.apk</code>），按名安装，避免装成下载夹里的旧包</li>
+      <li>只有 App 壳本身有功能更新时才需要重装；普通界面升级刷新即生效，无需任何操作</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /.wrap -->
+</body>
+</html>

@@ -215,6 +215,15 @@
   .about-card .a-row{margin-top:8px;}
   .about-card .a-lic{display:inline-block; margin-top:10px; padding:4px 11px; border-radius:999px; background:var(--hover); color:var(--accent); font-size:12px; text-decoration:none;}
   .about-card .a-ver{color:var(--faint); font-size:11.5px; margin-top:12px;}
+  .about-card .a-dl{display:flex; align-items:center; gap:10px; margin-top:12px; padding:10px 12px; background:var(--hover); border-radius:10px; text-decoration:none; color:inherit;}
+  .about-card .a-dl-icon{width:30px; height:30px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; flex:none;}
+  .about-card .a-dl-icon svg{width:15px; height:15px; fill:#fff;}
+  .about-card .a-dl-info{flex:1; min-width:0;}
+  .about-card .a-dl-name{font-size:13px; font-weight:600; color:var(--text);}
+  .about-card .a-dl-ver{font-size:11.5px; color:var(--muted); margin-top:1px;}
+  .about-card .a-dl-arr svg{width:14px; height:14px; fill:var(--faint); vertical-align:middle;}
+  .menu-item .mt{flex:1; min-width:0;}
+  .menu-item .switch{margin-left:auto;}
   .fmt-pre, .prompt-box pre{background:var(--field); border-radius:8px; padding:10px 12px; margin:6px 0; font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:break-word; color:var(--text); overflow-x:auto;}
   .bubble-card{background:var(--field); border-radius:12px; padding:4px 12px;}
   .bubble-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; font-size:14px;}
@@ -412,9 +421,7 @@
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="menu-item" id="syncNowItem"><svg class="ic" viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg><div class="mt">立即同步<small>拉云端、逐条合并、再上传；不会整份覆盖</small></div></div>
-      <div class="bubble-card">
-        <div class="bubble-row"><span>改动后自动同步（停手 1.5 秒）</span><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
-      </div>
+      <div class="menu-item" id="autoSyncItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C14.7486 4 17.1749 5.38626 18.6156 7.5H16V9.5H22V3.5H20V5.99936C18.1762 3.57166 15.2724 2 12 2C6.47715 2 2 6.47715 2 12H4C4 7.58172 7.58172 4 12 4ZM20 12C20 16.4183 16.4183 20 12 20C9.25144 20 6.82508 18.6137 5.38443 16.5H8V14.5H2V20.5H4V18.0006C5.82381 20.4283 8.72764 22 12 22C17.5228 22 22 17.5228 22 12H20Z"/></svg><div class="mt">改动后自动同步<small>停手 1.5 秒后自动做一次合并同步</small></div><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
       <div class="sync-box">
         <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
         <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
@@ -439,7 +446,7 @@
 
       <div class="sec-label">显示</div>
       <div class="bubble-card">
-        <div class="bubble-row"><span>代码高亮（编辑时）</span><label class="switch"><input type="checkbox" id="hlToggle"><span class="track"></span></label></div>
+        <div class="bubble-row"><span>代码高亮</span><label class="switch"><input type="checkbox" id="hlToggle"><span class="track"></span></label></div>
         <div class="bubble-row"><span>隐私模式（子条目打码，只留首尾4字）</span><label class="switch"><input type="checkbox" id="privToggle"><span class="track"></span></label></div>
       </div>
       <div class="sec-label">标题栏显示</div>
@@ -1130,9 +1137,22 @@ $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card
   <div class="a-row"><b>v1.7 更新</b>：云同步改为逐条合并（不再整份覆盖），删除会同步、误删有安全阀；打开 App 只读本机，想拉云端点「立即同步」；新增本地快照、检查更新。云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
+  <a class="a-dl" id="aboutDlCard" href="https://copwe.netlify.app/copie-1.6.apk" target="_blank">
+    <div class="a-dl-icon"><svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg></div>
+    <div class="a-dl-info"><div class="a-dl-name">下载 Android App</div><div class="a-dl-ver" id="aboutDlVer">Copie v${APP_VERSION}</div></div>
+    <div class="a-dl-arr"><svg viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></div>
+  </a>
+  <a class="a-lic" href="guide.html" target="_blank">使用教程</a>
   <a class="a-lic" href="https://polyformproject.org/licenses/noncommercial/1.0.0" target="_blank">PolyForm Noncommercial 1.0.0</a>
   <div class="a-ver">v${APP_VERSION}</div>
-</div>`; fillSyncForm(); buildThemeUI(); buildDisplayUI(); $('#settingsPage').classList.add('show'); };
+</div>`;
+  fillSyncForm(); buildThemeUI(); buildDisplayUI(); $('#settingsPage').classList.add('show');
+  fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{
+    const c=$('#aboutDlCard'), v=$('#aboutDlVer');
+    if(d.apk&&c) c.href=d.apk;
+    if(v) v.textContent='Copie v'+(d.versionName||APP_VERSION)+'  ·  '+(d.apk?d.apk.split('/').pop():'copie.apk');
+  }).catch(()=>{});
+};
 $('#themeSeg').addEventListener('click',e=>{ const b=e.target.closest('[data-theme-mode]'); if(!b) return;
   const t=loadTheme(); t.mode=b.dataset.themeMode; saveTheme(t); applyTheme(); buildThemeUI(); });
 $('#accentSwatches').addEventListener('click',e=>{
@@ -1191,7 +1211,7 @@ function autoSyncOn(){ return loadSync().auto!==false; }
 function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||'';
   if($('#autoSyncToggle')) $('#autoSyncToggle').checked=autoSyncOn(); updateSyncNote(); }
 function updateSyncNote(){ const c=loadSync(), el=$('#syncNote'); if(!el) return;
-  if(c.token){ el.innerHTML='✅ 已连接'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 只读本机数据，不自动拉云端；点上面「立即同步」做逐条合并。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
+  if(c.token){ el.innerHTML='<svg style="width:14px;height:14px;vertical-align:middle;fill:var(--ok);margin-right:4px;margin-top:-2px" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"/></svg><span style="color:var(--ok)">已连接</span>'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 只读本机数据，不自动拉云端；点上面「立即同步」做逐条合并。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
   else{ el.innerHTML='先在 GitHub 手动建一个<b>私有</b>仓库 <code>copie-data</code>，再生成 <b>fine-grained</b> token（只授权这一个仓库、Contents 读写），连同一个<b>主密码</b>一起填。数据会<b>加密</b>后才上云；Token 与主密码都<b>只存本机浏览器</b>，不进代码、不上云。'; }
 }
 function ghH(c){ return {'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}; }
@@ -1327,6 +1347,7 @@ $('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); con
   const c=loadSync(); if(c.token!==tok){ delete c.repo; delete c._sha; } c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
 $('#syncNowItem').onclick=()=>syncNow(true);
+$('#autoSyncItem').addEventListener('click',e=>{ if(e.target.closest('.switch')) return; const cb=$('#autoSyncToggle'); cb.checked=!cb.checked; cb.dispatchEvent(new Event('change')); });
 $('#autoSyncToggle').onchange=e=>{ const c=loadSync(); c.auto=!!e.target.checked; saveSyncCfg(c); toast(c.auto?'改动后会自动同步':'已改为纯手动同步'); };
 
 /* ---------- 本地快照：查看 / 恢复 / 手动留底 ---------- */
