@@ -1,5 +1,5 @@
 /* Copie Service Worker —— 网络优先：联网永远最新，断网用缓存兜底 */
-const CACHE = 'copie-v21';
+const CACHE = 'copie-v22';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {

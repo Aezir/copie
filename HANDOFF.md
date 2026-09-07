@@ -24,7 +24,7 @@
   - `index.html` —— App 本体（结构+样式+逻辑全在里面）
   - `sw.js` —— Service Worker，离线缓存外壳
   - `manifest.webmanifest` —— PWA 清单
-  - `icon.svg` —— App 图标（蓝渐变+复制符号）
+  - `icon.svg` —— App 图标（粉渐变 #ffa3a3→#ff8080 + 白色复制符号，与壳 APK 的粉底白卡图标统一；2026-09-07 前是蓝渐变）
   - `netlify.toml` —— 发布目录=根、入口/SW 不缓存
   - `README.md` / `HANDOFF.md`
 
