@@ -14,7 +14,7 @@
 ## 三、仓库与托管
 - **GitHub**：`Aezir/copie`（**公开**——为免费版 Netlify CI 放行而公开；代码无密钥，用户数据在另一个私有仓 `copie-data` 和本机浏览器里）。本项目就是仓库根目录（`copie/` 文件夹 = git 仓库根）。提交邮箱固定用 GitHub noreply（`109808984+Aezir@users.noreply.github.com`），别改回私人邮箱（历史已为隐私改写过一次）。
 - **本地路径**：`D:\projtects\copie\`（2026-09-07 重新克隆；旧路径 `D:\Documents\DailyResearch\copie\` 已弃）。**唯一源文件是 `index.html`**（旧的 copybox.html 已并入并删除）。
-- **线上**：https://copwe.netlify.app （Netlify，主站，壳 APK 加载的是这个）；**备用 https://copie-lake.vercel.app**（Vercel，2026-09-07 因 Netlify 免费额度用尽临时部署，`vercel deploy --prod --yes --scope aezirs-projects`，缓存头在 vercel.json）。
+- **线上**：https://copwe.netlify.app （Netlify，主站，壳 APK 加载的是这个）；**备用 https://copie-lake.vercel.app**（Vercel，2026-09-07 因 Netlify 免费额度用尽临时部署，发布用 **`bash deploy-vercel.sh`**：它把文件拷到一个没有 .git 的临时目录再发。直接在仓库目录里 `vercel deploy` 会被判 BLOCKED——Vercel 拿 git 提交作者邮箱对账号，noreply 邮箱对不上。缓存头在 vercel.json，`.vercelignore` 排除了 APK 等）。
 - **部署方式**：已接**持续部署**——`git push` 到 main **自动上线**（Netlify 通过 deploy key 拉私有仓库 + GitHub webhook 触发）。也可手动 `netlify deploy --prod`（CLI 已登录，目录已关联站点；`.netlify/` 被 `.gitignore` 忽略）。
 - **Netlify 徽标**（"Powered by Netlify"）：在 Netlify 面板 **Project configuration → General → Powered by Netlify badge** 关掉（按项目、免费版可关，无 CLI/toml 办法）。
 
