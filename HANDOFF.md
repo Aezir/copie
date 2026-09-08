@@ -33,12 +33,12 @@
 - **IndexedDB**：库名 `copybox`（**DB_VER=2**），store `entries`（keyPath `id`）+ store `backups`（keyPath `at`，本机快照，最多 8 份）。
 - 一条记录 `entry`：
   ```
-  { id, title, tags:[string], blocks:[string], fav:bool, pinned:bool, createdAt, updatedAt, syncAt }
+  { id, title, tags:[string], blocks:[{key:string,value:string}], fav:bool, pinned:bool, createdAt, updatedAt, syncAt }
   ```
   - `syncAt`：**每次 `put()` 都刷新**（除同步写入），只给同步合并用，**不参与排序**（排序仍用 `updatedAt`，见第八节）。
 - 删除墓碑：`localStorage['copie.tomb']` = `{id: 删除时间}`，`del()` 自动记，`put()` 同 id 自动撤，90 天剪枝。随数据一起上云。
-  - `blocks`：一条记录下面**一行行平级的文本块**（每块独立复制/就地编辑）。没有"字段名/值"配对。
-  - `normalize(raw)` 会把任意旧格式（早期 fields:[{label,value}]）迁移成 blocks。
+  - `blocks`：一条记录下面**一行行平级的文本块**。每块的 `value` 独立复制/就地编辑；可选 `key` 仅在左侧显示。没有 key 时 value 铺满整行。
+  - `normalize(raw)` 会把旧字符串 blocks 和早期 fields:[{label,value}] 迁移成 `{key,value}` 块。
 
 ## 六、主要功能（都在 index.html）
 - 列表：标题左 + 彩色标签右（`tagColor()` 按名字 hash 配色）+ 淡色更新日期。
