@@ -724,7 +724,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.80';
+const APP_VERSION='1.81';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1044,9 +1044,15 @@ let swipe=null;
 function closeSwipe(){ if(openSwipe){ openSwipe.classList.remove('open'); openSwipe=null; } }
 $('#list').addEventListener('pointerdown',e=>{
   if(selMode) return;
-  const head=e.target.closest('.item-head'); if(!head) return;
-  if(e.target.closest('button')||e.target.closest('[contenteditable="true"]')) return;
-  const wrap=head.closest('.item-wrap'); const slide=wrap.querySelector('.item');
+  const wrap=e.target.closest('.item-wrap'); if(!wrap) return;
+  if(wrap.classList.contains('open')){
+    // 已滑开：露出的按钮、空隙、标题都能起手划回（轻点按钮仍会生效）；展开的子条目区域交给子条目自己
+    if(e.target.closest('.item-body')) return;
+  } else {
+    if(!e.target.closest('.item-head')) return;
+    if(e.target.closest('button')||e.target.closest('[contenteditable="true"]')) return;
+  }
+  const slide=wrap.querySelector('.item');
   swipe={wrap,slide,x0:e.clientX,y0:e.clientY,base:wrap.classList.contains('open')?-150:0,moved:false,horizontal:false,pid:e.pointerId};
 });
 $('#list').addEventListener('pointermove',e=>{
@@ -1109,11 +1115,12 @@ $('#removeNameConfirm').onclick=async()=>{ const pending=pendingNameRemoval; if(
 };
 $('#list').addEventListener('pointerdown',e=>{
   if(selMode) return;
-  const row=e.target.closest('.blk .row'); if(!row) return;
+  const blk=e.target.closest('.blk'); if(!blk) return; const row=blk.querySelector('.row');
   // 正文/名称是可编辑文字、占满整行；只在它正处于编辑状态（有光标）时才让给编辑，否则照样能起手左滑
   const ed=e.target.closest('[contenteditable="true"]');
-  if(e.target.closest('button')||(ed&&ed===document.activeElement)) return;
-  const blk=row.closest('.blk');
+  if(ed&&ed===document.activeElement) return;
+  // 没滑开时只能在行上起手、按钮上不起手；已滑开时整块任意位置（含露出的标签/删除按钮、空隙）都能起手划回
+  if(!blk.classList.contains('blk-open')&&(!e.target.closest('.blk .row')||e.target.closest('button'))) return;
   blkSwipe={blk,row,x0:e.clientX,y0:e.clientY,base:blk.classList.contains('blk-open')?-104:0,moved:false,horizontal:false,pid:e.pointerId};
 });
 $('#list').addEventListener('pointermove',e=>{
@@ -1424,8 +1431,10 @@ $('#saveFilterName').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.prev
 let presetSwipe=null, openPresetSwipe=null, ignorePresetClick=false;
 function closePresetSwipe(){ if(openPresetSwipe){ openPresetSwipe.classList.remove('open'); openPresetSwipe=null; } }
 $('#savedFilterList').addEventListener('pointerdown',e=>{
-  const row=e.target.closest('.saved-filter'); if(!row||e.target.closest('[data-delete-filter-preset]')||e.target.closest('[contenteditable="true"]')) return;
-  const wrap=row.closest('.saved-filter-wrap');
+  const wrap=e.target.closest('.saved-filter-wrap'); if(!wrap) return; const row=wrap.querySelector('.saved-filter');
+  const ed=e.target.closest('[contenteditable="true"]'); if(ed&&ed===document.activeElement) return;
+  // 没滑开时只能在预选行上起手；已滑开时露出的删除按钮上也能起手划回
+  if(!wrap.classList.contains('open')&&(!e.target.closest('.saved-filter')||e.target.closest('[data-delete-filter-preset]')||ed)) return;
   presetSwipe={wrap,row,x0:e.clientX,y0:e.clientY,base:wrap.classList.contains('open')?-50:0,horizontal:false,pid:e.pointerId};
 });
 $('#savedFilterList').addEventListener('pointermove',e=>{
@@ -1458,6 +1467,7 @@ $('#savedFilterList').addEventListener('focusout',e=>{
 });
 $('#savedFilterList').addEventListener('keydown',e=>{ if(e.target.closest('[data-filter-preset-name]')&&(e.key==='Enter'||e.key==='Escape')){ e.preventDefault(); if(e.key==='Escape') e.target.innerText=e.target.dataset.original||e.target.innerText; e.target.blur(); } });
 $('#savedFilterList').addEventListener('click',e=>{
+  if(ignorePresetClick) return; // 刚划过（包括从删除按钮上起手划回），这次点击不算
   const delBtn=e.target.closest('[data-delete-filter-preset]');
   if(delBtn){
     const presets=loadFilterPresets(), index=presets.findIndex(p=>p.id===delBtn.dataset.deleteFilterPreset);
@@ -1814,6 +1824,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.81', d:'2026-09-13', items:[
+    '左滑露出按钮后，从按钮或空隙上也能划回去（条目、文本块、筛选预选都一样）；轻点按钮照常生效',
+  ]},
   {v:'1.80', d:'2026-09-13', items:[
     '标签或保存的预选很多时，筛选菜单不再顶出屏幕：左右留边，超出部分在菜单里滚动',
   ]},
