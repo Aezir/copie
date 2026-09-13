@@ -704,7 +704,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.7';
+const APP_VERSION='1.71';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1376,7 +1376,7 @@ $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card
   <div class="a-row">版本更新请点「关于」标题旁的图标查看；云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
-  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.73/copie-1.73.apk" target="_blank">
+  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.74/copie-1.74.apk" target="_blank">
     <div class="a-dl-icon"><svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg></div>
     <div class="a-dl-info"><div class="a-dl-name">下载 Android App</div><div class="a-dl-ver" id="aboutDlVer">Copie v${APP_VERSION}</div></div>
     <div class="a-dl-arr"><svg viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></div>
@@ -1403,6 +1403,21 @@ $('#bgSwatches').addEventListener('click',e=>{
   const b=e.target.closest('[data-bg]'); if(!b) return;
   const t=loadTheme(); t.bg=b.dataset.bg; delete t.bgHex; saveTheme(t); applyTheme(); buildThemeUI(); });
 $('#backBtn').onclick=()=>$('#settingsPage').classList.remove('show');
+/* 系统返回（壳 App 的返回键/边缘手势调进来）：从最上层往下关一层，关掉了返回 true；没东西可关返回 false，由壳退出 */
+window.copieBack=function(){
+  const layers=[
+    ['#bloomMask',closeBloom], ['#addNameMask',closeAddName], ['#removeNameMask',()=>$('#removeNameCancel').click()],
+    ['#saveFilterMask',closeSaveFilter], ['#tagMask',()=>$('#tagCancel').click()], ['#editMask',()=>$('#cancelEdit').click()],
+    ['#snapMask',()=>$('#snapClose').click()], ['#logMask',()=>$('#logClose').click()],
+    ['#importHelpMask',()=>$('#importHelpClose').click()], ['#helpMask',()=>$('#helpClose').click()],
+  ];
+  for(const [sel,close] of layers){ const el=$(sel); if(el&&el.classList.contains('show')){ close(); return true; } }
+  if($('#filterPop').classList.contains('show')||$('#sortPop').classList.contains('show')){ closePops(); return true; }
+  if($('#settingsPage').classList.contains('show')){ $('#backBtn').click(); return true; }
+  if(openSwipe){ closeSwipe(); return true; }
+  if(selMode){ setSelMode(false); return true; }
+  return false;
+};
 $('#exportItem').onclick=()=>{
   const json=JSON.stringify({app:'copie',version:3,exportedAt:new Date().toISOString(),entries},null,2);
   const fname=`copie-备份-${stamp()}.json`;
@@ -1624,6 +1639,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.71', d:'2026-09-13', items:[
+    '安卓 App 里用返回键或边缘返回手势：先关弹窗、设置页、筛选菜单、多选，都关完了才退出 App',
+  ]},
   {v:'1.7', d:'2026-09-07', items:[
     '云同步改为<b>逐条合并</b>：同一条谁改得晚用谁的，两边各自新增的都保留，不再整份覆盖',
     '删除通过"删除记录"同步到其他设备；撤回后会复活',
