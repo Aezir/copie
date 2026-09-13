@@ -348,7 +348,7 @@
   .rm-fld{width:32px; height:32px; flex:none; background:transparent; border:none; color:var(--faint); border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; margin-top:2px;}
   .rm-fld .ic{width:15px; height:15px;}
   .rm-fld:hover{background:var(--hover); color:var(--danger);}
-  .ta{resize:none; overflow:hidden; line-height:1.55;} /* 默认 1 行，随内容自动长高（autoGrow） */
+  .ta{resize:none; overflow:hidden; line-height:1.55; max-height:200px;} /* 默认 1 行，随内容长高，最多约 8 行，再多框内滚动 */
   .add-fld{display:flex; align-items:center; gap:5px; width:100%; padding:8px 10px; border:none; background:transparent; color:var(--muted); border-radius:7px; cursor:pointer; font-size:13.5px; margin:2px 0 14px; font-family:inherit;}
   .add-fld .ic{width:16px; height:16px;}
   .add-fld:hover{background:var(--hover);}
@@ -704,7 +704,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.73';
+const APP_VERSION='1.74';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1194,9 +1194,11 @@ function blkEditHTML(block={key:'',value:''}){
   return `<div class="blk-edit"><textarea class="field-in ta blk-key" rows="1" placeholder="名称">${esc(blockKey(block))}</textarea><textarea class="field-in ta blk-value" rows="1" placeholder="内容">${esc(blockValue(block))}</textarea></div>`;
 }
 /* 多行框随内容长高：先归零再按 scrollHeight 撑开；弹窗隐藏时量不到，打开后再统一算一次 */
-function autoGrow(el){ if(!el) return; el.style.height='auto'; const c=getComputedStyle(el);
+function autoGrow(el){ if(!el||!el.getClientRects().length) return; // 没显示出来就不量，免得算成 0
+  el.style.height='auto'; const c=getComputedStyle(el);
   const extra=c.boxSizing==='border-box'?(parseFloat(c.borderTopWidth)||0)+(parseFloat(c.borderBottomWidth)||0):-((parseFloat(c.paddingTop)||0)+(parseFloat(c.paddingBottom)||0));
-  el.style.height=(el.scrollHeight+extra)+'px'; }
+  el.style.height=(el.scrollHeight+extra)+'px';
+  el.style.overflowY=el.scrollHeight>el.clientHeight+1?'auto':'hidden'; } // 顶到上限后改成框内滚动
 /* 算两遍：第一遍长高后弹窗可能出现滚动条、框变窄、文字多折行，第二遍按新宽度补齐 */
 function growAllBlk(){ const all=document.querySelectorAll('#blocksWrap .ta'); all.forEach(autoGrow);
   requestAnimationFrame(()=>all.forEach(autoGrow)); }
@@ -1209,7 +1211,7 @@ function openEdit(id){
   $('#editTitle').textContent=id?'编辑':'新建';
   $('#fTitle').value=ent?.title||''; $('#fTags').value=(ent?.tags||[]).join(' ');
   $('#blocksWrap').innerHTML=''; (ent?.blocks?.length?ent.blocks:['']).forEach(addBlkRow);
-  $('#editMask').classList.add('show'); requestAnimationFrame(growAllBlk);
+  $('#editMask').classList.add('show'); growAllBlk();
 }
 $('#addBtn').onclick=()=>openEdit(null);
 $('#addBlkBtn').onclick=()=>addBlkRow({key:'',value:''});
@@ -1650,6 +1652,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.74', d:'2026-09-13', items:[
+    '新建/编辑的「名称」「内容」框最多长到约 8 行，再长就在框里滚动',
+  ]},
   {v:'1.73', d:'2026-09-13', items:[
     '新建/编辑里「名称」「内容」框默认一行高，随内容自动长高，清空后缩回',
   ]},
