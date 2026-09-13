@@ -40,6 +40,15 @@
     --appbg:#111;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  /* 隐藏所有原生滚动条（隐藏后不占宽度），由 #sbLayer 里的浮动滑块代替 */
+  *{scrollbar-width:none;}
+  *::-webkit-scrollbar{display:none; width:0; height:0;}
+  #sbLayer{position:absolute; inset:0; pointer-events:none; z-index:1000; overflow:hidden;}
+  .sb-thumb{position:absolute; display:none; border-radius:2px; background:var(--faint); opacity:0; pointer-events:none; touch-action:none; transition:opacity .22s ease, background-color .15s;}
+  .sb-y{width:4px;} .sb-x{height:4px;}
+  .sb-thumb.on{opacity:1; pointer-events:auto;}
+  .sb-thumb:hover, .sb-thumb.drag{background:var(--muted);}
+  @media (hover:none){ .sb-thumb.on{pointer-events:none;} } /* 触屏上不抢手指，滑内容即可 */
   html,body{height:100%;}
   body{
     margin:0; background:var(--appbg); color:var(--text);
@@ -140,14 +149,8 @@
   .row{display:flex; align-items:flex-start; gap:4px;}
   .cell{flex:1; min-width:0; outline:none; border-radius:4px;}
   .cell:focus{box-shadow:0 0 0 2px var(--accent); padding:2px 4px; margin:-2px -4px;}
-  .block-text{font-size:14px; line-height:1.55; color:var(--text); white-space:pre-wrap; word-break:break-all; max-height:160px; overflow-y:auto; overscroll-behavior:contain; min-height:22px; padding-top:1px; scrollbar-width:thin; scrollbar-color:transparent transparent;}
-  .block-text:hover, .block-text:focus, .block-text.scrolling{scrollbar-color:rgba(130,130,130,.4) transparent;}
-  .block-text::-webkit-scrollbar{width:6px;}
-  .block-text::-webkit-scrollbar-button{display:none; width:0; height:0;}
-  .block-text::-webkit-scrollbar-track{background:transparent;}
+  .block-text{font-size:14px; line-height:1.55; color:var(--text); white-space:pre-wrap; word-break:break-all; max-height:160px; overflow-y:auto; overscroll-behavior:contain; min-height:22px; padding-top:1px;}
   .row-actions{flex:none; display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .block-text::-webkit-scrollbar-thumb{background:transparent; border-radius:3px;}
-  .block-text:hover::-webkit-scrollbar-thumb, .block-text:focus::-webkit-scrollbar-thumb, .block-text.scrolling::-webkit-scrollbar-thumb{background:rgba(130,130,130,.4);}
   .block-text:empty::before{content:'点击输入'; color:var(--faint);}
   .block-text.expanded, .block-text:focus{max-height:none; overflow:visible;}
   .rowcopy{flex:none; display:flex; align-items:center; gap:3px; height:26px; padding:0 6px; border:none; border-radius:6px; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; opacity:.5; transition:opacity .12s, background .12s, color .12s; font-family:inherit;}
@@ -704,7 +707,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.74';
+const APP_VERSION='1.75';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1184,10 +1187,78 @@ $('#list').addEventListener('keydown',e=>{ if(e.key==='Escape'&&e.target.dataset
 /* 点空白区域即退出子条目编辑（contenteditable 不会自动失焦） */
 document.addEventListener('pointerdown',e=>{ const a=document.activeElement;
   if(a&&a.dataset&&a.dataset.k==='block'&&!e.target.closest('[contenteditable="true"]')) a.blur(); }, true);
-/* 滚动条只在滚动时显示：滚动中加 .scrolling，停手 0.9s 收起 */
-$('#list').addEventListener('scroll',e=>{ const el=e.target;
-  if(el.classList&&el.classList.contains('block-text')){ el.classList.add('scrolling');
-    clearTimeout(el._st); el._st=setTimeout(()=>el.classList.remove('scrolling'),900); } }, true);
+/* ---------- 浮动滚动条 ----------
+   原生滚动条已全局隐藏。在 #phone 顶层铺一层透明图层 #sbLayer，谁在滚就给谁画一根细滑块：
+   · 顶层捕获 scroll 事件，所有滚动区域（含 textarea、以后新加的）自动生效，不用逐个接
+   · 长度 = 可见高度/内容高度（最短 24px），位置跟随滚动；按祖先容器裁到"看得见的那部分"
+   · 滚动时出现，停手 0.9s 淡出；电脑上悬停不消失、可按住拖动；触屏上不响应手指 */
+(function(){
+  const phone=$('#phone'); if(!phone) return;
+  const layer=document.createElement('div'); layer.id='sbLayer'; phone.appendChild(layer);
+  const bars=new Map(), HIDE=900, MIN=24, T=4, GAP=2;
+
+  function clipRect(el){ // el 自身矩形与所有会裁剪的祖先（直到 #phone）求交 = 真正看得见的部分
+    const f=el.getBoundingClientRect(); let t=f.top,l=f.left,r=f.right,b=f.bottom;
+    for(let p=el.parentElement; p; p=p.parentElement){
+      const cs=getComputedStyle(p);
+      if(p===phone||cs.overflowX!=='visible'||cs.overflowY!=='visible'){ const q=p.getBoundingClientRect();
+        t=Math.max(t,q.top); l=Math.max(l,q.left); r=Math.min(r,q.right); b=Math.min(b,q.bottom); }
+      if(p===phone) break; }
+    return {f,t,l,r,b};
+  }
+  function mk(el,axis){ const d=document.createElement('div'); d.className='sb-thumb sb-'+axis; layer.appendChild(d);
+    d.addEventListener('pointerenter',()=>{ d._hover=true; hold(el); });
+    d.addEventListener('pointerleave',()=>{ d._hover=false; later(el); });
+    d.addEventListener('pointerdown',e=>startDrag(e,el,axis,d)); return d; }
+  function get(el){ let o=bars.get(el); if(!o){ o={y:mk(el,'y'),x:mk(el,'x'),timer:0,dragging:false}; bars.set(el,o); } return o; }
+  function drop(el){ const o=bars.get(el); if(!o) return; clearTimeout(o.timer); o.y.remove(); o.x.remove(); bars.delete(el); }
+
+  function place(el){ const o=bars.get(el); if(!o) return;
+    if(!el.isConnected||!el.getClientRects().length){ drop(el); return; }
+    const pr=phone.getBoundingClientRect(), c=clipRect(el), f=c.f;
+    // 竖向
+    const ch=el.clientHeight, sh=el.scrollHeight;
+    if(sh>ch+1){ const len=Math.max(MIN,f.height*ch/sh), top=f.top+(el.scrollTop/(sh-ch))*(f.height-len);
+      const y0=Math.max(top,c.t), y1=Math.min(top+len,c.b);
+      if(y1-y0>4&&c.r-c.l>T+GAP){ o.y.style.display='block'; o.y.style.top=(y0-pr.top)+'px'; o.y.style.height=(y1-y0)+'px';
+        o.y.style.left=(Math.min(f.right,c.r)-pr.left-T-GAP)+'px'; o.y._len=len; o.y._track=f.height; }
+      else o.y.style.display='none'; }
+    else o.y.style.display='none';
+    // 横向
+    const cw=el.clientWidth, sw=el.scrollWidth;
+    if(sw>cw+1){ const len=Math.max(MIN,f.width*cw/sw), left=f.left+(el.scrollLeft/(sw-cw))*(f.width-len);
+      const x0=Math.max(left,c.l), x1=Math.min(left+len,c.r);
+      if(x1-x0>4&&c.b-c.t>T+GAP){ o.x.style.display='block'; o.x.style.left=(x0-pr.left)+'px'; o.x.style.width=(x1-x0)+'px';
+        o.x.style.top=(Math.min(f.bottom,c.b)-pr.top-T-GAP)+'px'; o.x._len=len; o.x._track=f.width; }
+      else o.x.style.display='none'; }
+    else o.x.style.display='none';
+  }
+  function hold(el){ const o=bars.get(el); if(o) clearTimeout(o.timer); }
+  function later(el){ const o=bars.get(el); if(!o) return; clearTimeout(o.timer);
+    o.timer=setTimeout(()=>{ if(o.dragging||o.y._hover||o.x._hover) return;
+      o.y.classList.remove('on'); o.x.classList.remove('on');
+      o.timer=setTimeout(()=>drop(el),260); },HIDE); }
+  function show(el){ const o=get(el); place(el); o.y.classList.add('on'); o.x.classList.add('on'); later(el); }
+
+  function startDrag(e,el,axis,d){ const o=bars.get(el); if(!o) return;
+    e.preventDefault(); e.stopPropagation(); o.dragging=true; d.classList.add('drag'); hold(el);
+    try{ d.setPointerCapture(e.pointerId); }catch(_){}
+    const y=axis==='y', p0=y?e.clientY:e.clientX, s0=y?el.scrollTop:el.scrollLeft;
+    const range=y?el.scrollHeight-el.clientHeight:el.scrollWidth-el.clientWidth, room=Math.max(1,(d._track||1)-(d._len||0));
+    const move=ev=>{ const dp=(y?ev.clientY:ev.clientX)-p0, v=s0+dp*range/room; if(y) el.scrollTop=v; else el.scrollLeft=v; place(el); };
+    const up=()=>{ o.dragging=false; d.classList.remove('drag'); d.removeEventListener('pointermove',move);
+      d.removeEventListener('pointerup',up); d.removeEventListener('pointercancel',up); later(el); };
+    d.addEventListener('pointermove',move); d.addEventListener('pointerup',up); d.addEventListener('pointercancel',up);
+  }
+
+  // 顶层捕获：任何元素滚动都会经过这里（scroll 不冒泡，但捕获阶段能拿到）
+  document.addEventListener('scroll',e=>{ const el=e.target;
+    if(!(el instanceof Element)||el===layer) return;
+    show(el); bars.forEach((_,other)=>{ if(other!==el) place(other); }); // 父容器滚动时，子区域的滑块跟着挪
+  },{capture:true,passive:true});
+  window.addEventListener('resize',()=>bars.forEach((_,el)=>place(el)));
+  window.__sb={bars,show,place}; // 调试用
+})();
 
 /* ---------- 编辑弹层 ---------- */
 function blkEditHTML(block={key:'',value:''}){
@@ -1652,6 +1723,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.75', d:'2026-09-13', items:[
+    '所有滚动区域换成浮动细滑块：不占宽度，滚动时出现、停手淡出；电脑上可以按住拖动',
+  ]},
   {v:'1.74', d:'2026-09-13', items:[
     '新建/编辑的「名称」「内容」框最多长到约 8 行，再长就在框里滚动',
   ]},
