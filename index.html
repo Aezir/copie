@@ -64,7 +64,7 @@
   @media (min-width:500px){ #phone{box-shadow:0 0 0 1px rgba(0,0,0,.05), 0 12px 40px rgba(0,0,0,.13);} }
   .ic{width:18px; height:18px; display:inline-block; vertical-align:middle; flex:none; fill:currentColor;}
 
-  header{ padding:16px 10px 10px; }
+  header{ padding:8px 10px 10px; }
   .topbar{display:flex; align-items:center; gap:3px;}
   .search{flex:1; min-width:0; display:flex; align-items:center; gap:6px; padding:8px 10px; border-radius:8px; background:var(--field); margin-right:2px;}
   .search .ic{width:16px; height:16px; color:var(--faint);}
@@ -373,15 +373,15 @@
   #undoBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-140%); display:flex; align-items:center; gap:12px; background:var(--accent); color:#fff; padding:10px 12px 10px 16px; border-radius:0 0 12px 12px; font-size:13.5px; z-index:200; max-width:90vw; pointer-events:none; transition:transform .28s cubic-bezier(.22,1,.36,1);}
   #undoBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto; box-shadow:0 6px 22px rgba(0,0,0,.18);}
   /* 顶部同步提示：悬浮胶囊。收起时透明 + visibility:hidden，阴影跟着消失（以前只往上推，阴影尾巴会露在顶边） */
-  #syncBar{position:fixed; top:calc(10px + env(safe-area-inset-top, 0px)); left:50%; display:flex; align-items:center; gap:8px; background:var(--sheet); color:var(--muted); padding:8px 16px; border-radius:999px; font-size:12.5px; z-index:60; max-width:86vw; box-shadow:0 6px 20px rgba(0,0,0,.12);
+  #syncBar{position:fixed; top:calc(10px + env(safe-area-inset-top, 0px)); left:50%; display:flex; align-items:center; gap:8px; background:var(--accent); color:#fff; padding:8px 16px; border-radius:999px; font-size:12.5px; z-index:60; max-width:86vw;
     transform:translate(-50%, calc(-100% - 16px)) scale(.92); opacity:0; visibility:hidden; pointer-events:none;
     transition:transform .3s cubic-bezier(.2,.8,.2,1), opacity .22s ease, visibility 0s linear .3s;
     touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab;}
   #syncBar.show{transform:translate(-50%,0) scale(1); opacity:1; visibility:visible; pointer-events:auto; transition:transform .3s cubic-bezier(.2,.8,.2,1), opacity .22s ease, visibility 0s;}
   #syncBar.dragging{transition:none; cursor:grabbing;}
-  #syncBar .sync-spin{width:12px; height:12px; border:2px solid var(--divider); border-top-color:var(--accent); border-radius:50%; flex:none; display:none; animation:syncspin .8s linear infinite;}
+  #syncBar .sync-spin{width:12px; height:12px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; flex:none; display:none; animation:syncspin .8s linear infinite;}
   #syncBar.busy .sync-spin{display:block;}
-  #syncBar.fail{color:var(--danger);}
+  #syncBar.fail{color:#fff; font-weight:600;}
   #syncBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   @keyframes syncspin{to{transform:rotate(360deg);}}
   #undoBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62vw;}
@@ -712,7 +712,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.76';
+const APP_VERSION='1.77';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1752,6 +1752,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.77', d:'2026-09-13', items:[
+    '顶栏上方留白减半；同步提示胶囊改为主题色纯色底',
+  ]},
   {v:'1.76', d:'2026-09-13', items:[
     '顶部同步提示改成悬浮胶囊，往上下左右任意方向划都能划走；修掉收起后顶边残留的阴影',
   ]},
