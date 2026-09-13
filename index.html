@@ -104,7 +104,10 @@
   .item-wrap.dragging .sw-act{transition:none;}
   .item-wrap.open{--p:1;}
   .sw-pin{background:var(--pin);} .sw-fav{background:var(--fav);} .sw-del{background:var(--danger);} .sw-edit{background:var(--accent);}
-  .item{position:relative; z-index:1; background:var(--bg); border-radius:6px; transition:transform .22s cubic-bezier(.4,0,.2,1); touch-action:pan-y; will-change:transform;}
+  /* 列表区和弹出菜单整片：浏览器只管上下滑，左右留给网页手势（子元素一并覆盖，含自带滚动的正文） */
+  #list, #list *, .pop, .pop *{touch-action:pan-y;}
+  #gdbg{position:absolute; left:6px; bottom:6px; z-index:2000; margin:0; padding:6px 8px; font:11px/1.4 ui-monospace,monospace; color:#fff; background:rgba(0,0,0,.72); border-radius:8px; pointer-events:none; white-space:pre; max-width:90%;}
+  .item{position:relative; z-index:1; background:var(--bg); border-radius:6px; transition:transform .22s cubic-bezier(.4,0,.2,1); will-change:transform;}
   .item-wrap.open .item{transform:translateX(-150px);}
   .item-wrap.dragging .item{transition:none;}
 
@@ -204,7 +207,7 @@
   .pop-clear:hover,.pop-save:hover{background:var(--hover);}
   .saved-filter-list{display:flex; flex-direction:column; gap:4px; margin-top:5px; padding-top:7px; border-top:1px solid var(--divider);}
   .saved-filter-list:empty{display:none;}
-  .saved-filter-wrap{position:relative; overflow:hidden; border-radius:7px; touch-action:pan-y;}
+  .saved-filter-wrap{position:relative; overflow:hidden; border-radius:7px;}
   .saved-filter-wrap .swipe-actions{padding:0 9px 0 5px;}
   .saved-filter-wrap .sw-act.sw-del{width:34px; height:34px; background:transparent; color:var(--danger);}
   .saved-filter-wrap.open{--p:1;}
@@ -724,7 +727,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.81';
+const APP_VERSION='1.82';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -758,7 +761,7 @@ async function snapshotDaily(){ try{ const all=await bkList(); if(!all.length ||
 let entries=[], editingId=null, keyword='';
 let selectedTags=new Set(), sortMode='updated', sortOrder='desc';
 let selMode=false, selectedIds=new Set(), lastRendered=[];
-let openSwipe=null, ignoreClick=false, tagMode='add';
+let openSwipe=null, tagMode='add';
 const $=s=>document.querySelector(s);
 const uid=()=>'e_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const now=()=>Date.now();
@@ -1040,45 +1043,83 @@ function render(){
 }
 
 /* ---------- 左滑手势 ---------- */
-let swipe=null;
-function closeSwipe(){ if(openSwipe){ openSwipe.classList.remove('open'); openSwipe=null; } }
-$('#list').addEventListener('pointerdown',e=>{
-  if(selMode) return;
-  const wrap=e.target.closest('.item-wrap'); if(!wrap) return;
-  if(wrap.classList.contains('open')){
-    // 已滑开：露出的按钮、空隙、标题都能起手划回（轻点按钮仍会生效）；展开的子条目区域交给子条目自己
-    if(e.target.closest('.item-body')) return;
-  } else {
-    if(!e.target.closest('.item-head')) return;
-    if(e.target.closest('button')||e.target.closest('[contenteditable="true"]')) return;
-  }
-  const slide=wrap.querySelector('.item');
-  swipe={wrap,slide,x0:e.clientX,y0:e.clientY,base:wrap.classList.contains('open')?-150:0,moved:false,horizontal:false,pid:e.pointerId};
-});
-$('#list').addEventListener('pointermove',e=>{
-  if(!swipe) return;
-  const dx=e.clientX-swipe.x0, dy=e.clientY-swipe.y0;
-  if(!swipe.moved){ if(Math.abs(dx)>6||Math.abs(dy)>6){ swipe.moved=true; swipe.horizontal=Math.abs(dx)>Math.abs(dy);
-    if(swipe.horizontal){ if(openSwipe&&openSwipe!==swipe.wrap) closeSwipe(); swipe.wrap.classList.add('dragging'); try{$('#list').setPointerCapture(swipe.pid);}catch(_){} } } }
-  if(swipe.horizontal){ e.preventDefault(); let tx=Math.max(-164,Math.min(0,swipe.base+dx));
-    swipe.slide.style.transform=`translateX(${tx}px)`;
-    swipe.wrap.style.setProperty('--p', Math.max(0,Math.min(1,-tx/150))); }
-});
-function endSwipe(e){
-  if(!swipe) return; const s=swipe; swipe=null;
-  s.wrap.classList.remove('dragging'); s.slide.style.transform=''; s.wrap.style.removeProperty('--p');
-  if(s.horizontal){
-    const dx=(e?e.clientX:s.x0)-s.x0;
-    let open; if(dx<=-40) open=true; else if(dx>=40) open=false; else open=(s.base<-75);
-    s.wrap.classList.toggle('open',open); openSwipe=open?s.wrap:null;
-    ignoreClick=true; setTimeout(()=>{ignoreClick=false;},60);
-  }
-}
-$('#list').addEventListener('pointerup',endSwipe);
-$('#list').addEventListener('pointercancel',endSwipe);
+/* ---------- 手势总管 ----------
+   列表区和弹出菜单里的手指手势只走这一套：按下 → 判定意图（轻点 / 上下滚 / 左滑 / 长按拖出）→ 分发。
+   · 可滑元素由 SWIPE 表声明，命中时里层优先（文本块在条目里，先算文本块）
+   · 归属：CSS 把 #list / .pop 整片声明成 touch-action:pan-y（浏览器只管上下滑），
+     判定为左滑后再用 touchmove.preventDefault 明确"这一下归网页"，浏览器不能半路收走
+   · pointercancel 按手指最后位置结算，不再直接弹回
+   · 滑过 / 拖过之后 blockClicks() 统一吞掉紧跟着的 click
+   · 地址加 ?debug=gesture 会在屏幕上显示事件流 */
+const SWIPE={
+  blk:{ slide:'.row', openClass:'blk-open', dragClass:'blk-dragging', width:104, max:118, threshold:42,
+    canStart(e,w){ if(selMode) return false; const ed=e.target.closest('[contenteditable="true"]'); if(ed&&ed===document.activeElement) return false;
+      return w.classList.contains('blk-open') || (!!e.target.closest('.row')&&!e.target.closest('button')); },
+    onStart(){ try{ const a=document.activeElement; a&&a.blur&&a.blur(); }catch(_){} },
+    get open(){ return openBlk; }, set open(v){ openBlk=v; } },
+  item:{ slide:'.item', openClass:'open', dragClass:'dragging', width:150, max:164, threshold:40,
+    canStart(e,w){ if(selMode) return false;
+      if(w.classList.contains('open')) return !e.target.closest('.item-body'); // 已滑开：整行都能划回，展开的子条目区域交给子条目
+      return !!e.target.closest('.item-head')&&!e.target.closest('button')&&!e.target.closest('[contenteditable="true"]'); },
+    get open(){ return openSwipe; }, set open(v){ openSwipe=v; } },
+  preset:{ slide:'.saved-filter', openClass:'open', dragClass:'dragging', width:50, max:60, threshold:24, slop:8,
+    canStart(e,w){ const ed=e.target.closest('[contenteditable="true"]'); if(ed&&ed===document.activeElement) return false;
+      return w.classList.contains('open') || (!!e.target.closest('.saved-filter')&&!e.target.closest('[data-delete-filter-preset]')&&!ed); },
+    get open(){ return openPresetSwipe; }, set open(v){ openPresetSwipe=v; } },
+};
+function swipeHit(t){ const w=t.closest('.blk,.item-wrap,.saved-filter-wrap'); if(!w) return null;
+  const type=w.classList.contains('blk')?'blk':w.classList.contains('item-wrap')?'item':'preset'; return {type,wrap:w,cfg:SWIPE[type]}; }
 
+let gesture={s:'idle'}, clickBlockUntil=0;   // s: idle | pending | swipe | scroll | drag
+function blockClicks(){ clickBlockUntil=performance.now()+100; }
+const GDBG=/[?&]debug=gesture/.test(location.search); let dbgBox=null;
+function dbg(...a){ if(!GDBG) return; if(!dbgBox){ dbgBox=document.createElement('pre'); dbgBox.id='gdbg'; $('#phone').appendChild(dbgBox); }
+  dbgBox.textContent=((performance.now()/1000).toFixed(2)+' '+a.join(' ')+'\n'+dbgBox.textContent).split('\n').slice(0,12).join('\n'); }
+
+(function(){ const phone=$('#phone');
+  function startSwipe(){ const g=gesture, {wrap,cfg}=g.hit;
+    g.s='swipe'; g.slideEl=wrap.querySelector(cfg.slide); g.base=wrap.classList.contains(cfg.openClass)?-cfg.width:0;
+    if(cfg.open&&cfg.open!==wrap){ cfg.open.classList.remove(cfg.openClass); cfg.open=null; } // 同类只开一行
+    wrap.classList.add(cfg.dragClass); cfg.onStart&&cfg.onStart();
+    try{ phone.setPointerCapture(g.pid); }catch(_){} dbg('swipe', g.hit.type); }
+  function startDrag(){ const g=gesture; if(g.s!=='pending') return; const ent=findEnt(g.drag.dataset.id); if(!ent) return;
+    g.s='drag'; try{ navigator.vibrate&&navigator.vibrate(35); }catch(_){} try{ phone.setPointerCapture(g.pid); }catch(_){}
+    AndroidBridge.dragStart(JSON.stringify({id:ent.id,title:ent.title||'未命名',blocks:(ent.blocks||[]).map(blockValue)}),g.x,g.y); dbg('drag'); }
+
+  phone.addEventListener('pointerdown',e=>{
+    if(gesture.s!=='idle'||(e.pointerType==='mouse'&&e.button!==0)) return;
+    const hit=swipeHit(e.target), canSwipe=!!(hit&&hit.cfg.canStart(e,hit.wrap));
+    const drag=(hasFloat()&&e.target.closest('#list'))?e.target.closest('.item-wrap'):null; // 壳 App 里长按条目拖出悬浮条
+    if(!canSwipe&&!drag) return;
+    gesture={s:'pending',pid:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,hit:canSwipe?hit:null,drag,timer:0};
+    if(drag) gesture.timer=setTimeout(startDrag,450);
+    dbg('down', e.pointerType, canSwipe?hit.type:'-', (e.target.className&&String(e.target.className).split(' ')[0])||e.target.tagName);
+  });
+  phone.addEventListener('pointermove',e=>{
+    const g=gesture; if(g.s==='idle'||e.pointerId!==g.pid) return;
+    g.x=e.clientX; g.y=e.clientY; const dx=e.clientX-g.x0, dy=e.clientY-g.y0;
+    if(g.s==='drag'){ AndroidBridge.dragMove(e.clientX,e.clientY); e.preventDefault(); return; }
+    if(g.s==='pending'){ const slop=(g.hit&&g.hit.cfg.slop)||6; if(Math.abs(dx)<=slop&&Math.abs(dy)<=slop) return;
+      clearTimeout(g.timer); // 动了就不算长按
+      if(g.hit&&Math.abs(dx)>Math.abs(dy)) startSwipe(); else { g.s='scroll'; dbg('scroll'); } }
+    if(g.s==='swipe'){ e.preventDefault(); const c=g.hit.cfg, tx=Math.max(-c.max,Math.min(0,g.base+dx));
+      g.slideEl.style.transform=`translateX(${tx}px)`; g.hit.wrap.style.setProperty('--p',Math.max(0,Math.min(1,-tx/c.width))); }
+  });
+  function end(e){ const g=gesture; if(g.s==='idle'||e.pointerId!==g.pid) return; gesture={s:'idle'}; clearTimeout(g.timer);
+    const cancelled=e.type==='pointercancel', ex=cancelled?g.x:e.clientX, ey=cancelled?g.y:e.clientY; // 被浏览器取消时用最后位置
+    if(g.s==='drag'){ AndroidBridge.dragEnd(ex,ey); blockClicks(); e.preventDefault(); dbg('dragEnd'); return; }
+    if(g.s==='swipe'){ const {wrap,cfg}=g.hit; wrap.classList.remove(cfg.dragClass); g.slideEl.style.transform=''; wrap.style.removeProperty('--p');
+      const dx=ex-g.x0, open=dx<=-cfg.threshold?true:(dx>=cfg.threshold?false:(g.base<-cfg.width/2));
+      wrap.classList.toggle(cfg.openClass,open); cfg.open=open?wrap:null; blockClicks(); dbg(cancelled?'cancel→':'up→', open?'open':'close'); return; }
+    dbg(cancelled?'cancel':(g.s==='scroll'?'scrollEnd':'tap')); }
+  phone.addEventListener('pointerup',end); phone.addEventListener('pointercancel',end);
+  phone.addEventListener('touchmove',e=>{ if(gesture.s==='swipe'||gesture.s==='drag') e.preventDefault(); },{passive:false}); // 明确"这一下归网页"
+  phone.addEventListener('click',e=>{ if(performance.now()<clickBlockUntil){ e.stopPropagation(); e.preventDefault(); } },true);
+})();
+
+function closeSwipe(){ if(openSwipe){ openSwipe.classList.remove('open'); openSwipe=null; } }
 /* ---------- 子条目左滑删除 ---------- */
-let blkSwipe=null, openBlk=null;
+let openBlk=null;
 function closeBlk(){ if(openBlk){ openBlk.classList.remove('blk-open'); openBlk=null; } }
 const REMOVE_NAME_CONFIRM_KEY='copie.skipRemoveNameConfirm';
 let pendingNameRemoval=null, pendingNameAddition=null;
@@ -1113,38 +1154,9 @@ $('#removeNameConfirm').onclick=async()=>{ const pending=pendingNameRemoval; if(
   if($('#skipRemoveNameConfirm').checked){ try{localStorage.setItem(REMOVE_NAME_CONFIRM_KEY,'1');}catch(_){} }
   pendingNameRemoval=null; $('#removeNameMask').classList.remove('show'); await removeBlockName(pending.id,pending.bi);
 };
-$('#list').addEventListener('pointerdown',e=>{
-  if(selMode) return;
-  const blk=e.target.closest('.blk'); if(!blk) return; const row=blk.querySelector('.row');
-  // 正文/名称是可编辑文字、占满整行；只在它正处于编辑状态（有光标）时才让给编辑，否则照样能起手左滑
-  const ed=e.target.closest('[contenteditable="true"]');
-  if(ed&&ed===document.activeElement) return;
-  // 没滑开时只能在行上起手、按钮上不起手；已滑开时整块任意位置（含露出的标签/删除按钮、空隙）都能起手划回
-  if(!blk.classList.contains('blk-open')&&(!e.target.closest('.blk .row')||e.target.closest('button'))) return;
-  blkSwipe={blk,row,x0:e.clientX,y0:e.clientY,base:blk.classList.contains('blk-open')?-104:0,moved:false,horizontal:false,pid:e.pointerId};
-});
-$('#list').addEventListener('pointermove',e=>{
-  if(!blkSwipe) return;
-  const dx=e.clientX-blkSwipe.x0, dy=e.clientY-blkSwipe.y0;
-  if(!blkSwipe.moved){ if(Math.abs(dx)>6||Math.abs(dy)>6){ blkSwipe.moved=true; blkSwipe.horizontal=Math.abs(dx)>Math.abs(dy);
-    if(blkSwipe.horizontal){ if(openBlk&&openBlk!==blkSwipe.blk) closeBlk(); blkSwipe.blk.classList.add('blk-dragging');
-      try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(_){}
-      try{$('#list').setPointerCapture(blkSwipe.pid);}catch(_){} } } }
-  if(blkSwipe.horizontal){ e.preventDefault(); const tx=Math.max(-118,Math.min(0,blkSwipe.base+dx));
-    blkSwipe.row.style.transform=`translateX(${tx}px)`;
-    blkSwipe.blk.style.setProperty('--p', Math.max(0,Math.min(1,-tx/104))); }
-});
-function endBlk(e){ if(!blkSwipe) return; const s=blkSwipe; blkSwipe=null;
-  s.blk.classList.remove('blk-dragging'); s.row.style.transform=''; s.blk.style.removeProperty('--p');
-  if(s.horizontal){ const dx=(e?e.clientX:s.x0)-s.x0; let open; if(dx<=-42) open=true; else if(dx>=42) open=false; else open=(s.base<-52);
-    s.blk.classList.toggle('blk-open',open); openBlk=open?s.blk:null; ignoreClick=true; setTimeout(()=>{ignoreClick=false;},60); } }
-$('#list').addEventListener('pointerup',endBlk);
-$('#list').addEventListener('pointercancel',endBlk);
-
 /* ---------- 点击 ---------- */
 $('#list').addEventListener('click',async e=>{
   const t=e.target;
-  if(ignoreClick) return;
   const pinBtn=t.closest('[data-pin]');
   if(pinBtn){ const ent=findEnt(pinBtn.dataset.pin); ent.pinned=!ent.pinned; await put(ent); closeSwipe(); render(); toast(ent.pinned?'已置顶':'已取消置顶'); return; }
   const favBtn=t.closest('[data-fav]');
@@ -1428,33 +1440,8 @@ function commitFilterPreset(){
 }
 $('#saveFilterConfirm').onclick=commitFilterPreset;
 $('#saveFilterName').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); commitFilterPreset(); } });
-let presetSwipe=null, openPresetSwipe=null, ignorePresetClick=false;
+let openPresetSwipe=null;
 function closePresetSwipe(){ if(openPresetSwipe){ openPresetSwipe.classList.remove('open'); openPresetSwipe=null; } }
-$('#savedFilterList').addEventListener('pointerdown',e=>{
-  const wrap=e.target.closest('.saved-filter-wrap'); if(!wrap) return; const row=wrap.querySelector('.saved-filter');
-  const ed=e.target.closest('[contenteditable="true"]'); if(ed&&ed===document.activeElement) return;
-  // 没滑开时只能在预选行上起手；已滑开时露出的删除按钮上也能起手划回
-  if(!wrap.classList.contains('open')&&(!e.target.closest('.saved-filter')||e.target.closest('[data-delete-filter-preset]')||ed)) return;
-  presetSwipe={wrap,row,x0:e.clientX,y0:e.clientY,base:wrap.classList.contains('open')?-50:0,horizontal:false,pid:e.pointerId};
-});
-$('#savedFilterList').addEventListener('pointermove',e=>{
-  if(!presetSwipe) return; const s=presetSwipe, dx=e.clientX-s.x0, dy=e.clientY-s.y0;
-  if(!s.horizontal){ if(Math.abs(dx)<8||Math.abs(dx)<=Math.abs(dy)) return; s.horizontal=true;
-    if(openPresetSwipe&&openPresetSwipe!==s.wrap) closePresetSwipe(); s.wrap.classList.add('dragging');
-    try{s.row.setPointerCapture(s.pid);}catch(_){} }
-  e.preventDefault(); const tx=Math.max(-60,Math.min(0,s.base+dx));
-  s.row.style.transform=`translateX(${tx}px)`; s.wrap.style.setProperty('--p',Math.max(0,Math.min(1,-tx/50)));
-});
-function endPresetSwipe(e){
-  if(!presetSwipe) return; const s=presetSwipe; presetSwipe=null;
-  s.wrap.classList.remove('dragging'); s.row.style.transform=''; s.wrap.style.removeProperty('--p');
-  if(!s.horizontal) return;
-  const dx=(e?e.clientX:s.x0)-s.x0, open=dx<=-24 ? true : (dx>=24 ? false : s.base<-25);
-  s.wrap.classList.toggle('open',open); openPresetSwipe=open?s.wrap:null;
-  ignorePresetClick=true; setTimeout(()=>{ignorePresetClick=false;},60);
-}
-$('#savedFilterList').addEventListener('pointerup',endPresetSwipe);
-$('#savedFilterList').addEventListener('pointercancel',endPresetSwipe);
 $('#savedFilterList').addEventListener('focusin',e=>{ const el=e.target.closest('[data-filter-preset-name]'); if(el) el.dataset.original=el.innerText; });
 $('#savedFilterList').addEventListener('focusout',e=>{
   const el=e.target.closest('[data-filter-preset-name]'); if(!el) return;
@@ -1467,7 +1454,6 @@ $('#savedFilterList').addEventListener('focusout',e=>{
 });
 $('#savedFilterList').addEventListener('keydown',e=>{ if(e.target.closest('[data-filter-preset-name]')&&(e.key==='Enter'||e.key==='Escape')){ e.preventDefault(); if(e.key==='Escape') e.target.innerText=e.target.dataset.original||e.target.innerText; e.target.blur(); } });
 $('#savedFilterList').addEventListener('click',e=>{
-  if(ignorePresetClick) return; // 刚划过（包括从删除按钮上起手划回），这次点击不算
   const delBtn=e.target.closest('[data-delete-filter-preset]');
   if(delBtn){
     const presets=loadFilterPresets(), index=presets.findIndex(p=>p.id===delBtn.dataset.deleteFilterPreset);
@@ -1475,7 +1461,6 @@ $('#savedFilterList').addEventListener('click',e=>{
     showUndoBar(`已删除预选「${removed.name}」`,async()=>{ const latest=loadFilterPresets(); latest.splice(Math.min(index,latest.length),0,removed); saveFilterPresets(latest); buildFilterPop(); });
     return;
   }
-  if(ignorePresetClick) return;
   if(e.target.closest('[data-filter-preset-name]')) return;
   const b=e.target.closest('[data-filter-preset]'); if(!b) return;
   const preset=loadFilterPresets().find(p=>p.id===b.dataset.filterPreset); if(!preset) return;
@@ -1824,6 +1809,11 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.82', d:'2026-09-13', items:[
+    '手势重写：条目、文本块、筛选预选的左滑和长按拖出合并成一套总管，规则只写一处',
+    '修复手机上按在文本块文字上左滑只抖一下、拉不出标签和删除的问题',
+    '地址后加 ?debug=gesture 可在屏幕上看手势事件流，方便排查',
+  ]},
   {v:'1.81', d:'2026-09-13', items:[
     '左滑露出按钮后，从按钮或空隙上也能划回去（条目、文本块、筛选预选都一样）；轻点按钮照常生效',
   ]},
@@ -1960,33 +1950,6 @@ const hasFloat=()=>{ try{ return !!(window.AndroidBridge&&AndroidBridge.dragStar
 try{ if(hasFloat()){ const st=document.createElement('style');
   st.textContent='#list{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}';
   document.head.appendChild(st); } }catch(_){}
-let fpend=null, fdragging=false, fSuppressClick=false;
-$('#list').addEventListener('pointerdown',e=>{
-  if(!hasFloat()) return;
-  const wrap=e.target.closest('.item-wrap'); if(!wrap) return;
-  const id=wrap.dataset.id, x0=e.clientX, y0=e.clientY;
-  fpend={id,x:x0,y:y0,t:setTimeout(()=>{
-    const ent=findEnt(id); if(!ent||!fpend) return;
-    fdragging=true; swipe=null; // 接管手势，掐掉左滑
-    try{ navigator.vibrate&&navigator.vibrate(35); }catch(_){}
-    AndroidBridge.dragStart(JSON.stringify({id:ent.id,title:ent.title||'未命名',blocks:(ent.blocks||[]).map(blockValue)}),fpend.x,fpend.y);
-  },450)};
-},true);
-$('#list').addEventListener('pointermove',e=>{
-  if(fdragging){ fpend&&(fpend.x=e.clientX,fpend.y=e.clientY); AndroidBridge.dragMove(e.clientX,e.clientY);
-    e.preventDefault(); e.stopPropagation(); return; }
-  if(fpend && Math.hypot(e.clientX-fpend.x,e.clientY-fpend.y)>8){ clearTimeout(fpend.t); fpend=null; } // 动了就不算长按
-  else if(fpend){ fpend.x=e.clientX; fpend.y=e.clientY; }
-},true);
-function fdragFinish(e){
-  if(fdragging){ AndroidBridge.dragEnd(e.clientX||fpend?.x||0,e.clientY||fpend?.y||0);
-    fdragging=false; fSuppressClick=true; e.preventDefault(); e.stopPropagation(); }
-  if(fpend){ clearTimeout(fpend.t); fpend=null; }
-}
-$('#list').addEventListener('pointerup',fdragFinish,true);
-$('#list').addEventListener('pointercancel',fdragFinish,true);
-$('#list').addEventListener('click',e=>{ if(fSuppressClick){ fSuppressClick=false; e.preventDefault(); e.stopPropagation(); } },true);
-
 /* ---------- 分享入口：其他 App 分享文字进来，预填“新建” ---------- */
 let pendingShare=null;
 (function(){
