@@ -370,8 +370,13 @@
 
   #toast{position:absolute; left:50%; bottom:40px; transform:translateX(-50%) translateY(16px); background:var(--text); color:var(--bg); padding:9px 16px; border-radius:8px; font-size:13px; opacity:0; transition:.22s; z-index:60; pointer-events:none; letter-spacing:0;}
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-  #undoBar{position:fixed; top:0; left:50%; transform:translateX(-50%) translateY(-140%); display:flex; align-items:center; gap:12px; background:var(--accent); color:#fff; padding:10px 12px 10px 16px; border-radius:0 0 12px 12px; font-size:13.5px; z-index:200; max-width:90vw; pointer-events:none; transition:transform .28s cubic-bezier(.22,1,.36,1);}
-  #undoBar.show{transform:translateX(-50%) translateY(0); pointer-events:auto; box-shadow:0 6px 22px rgba(0,0,0,.18);}
+  /* 撤销条：与同步提示同款胶囊 */
+  #undoBar{position:fixed; top:calc(10px + env(safe-area-inset-top, 0px)); left:50%; display:flex; align-items:center; gap:10px; background:var(--accent); color:#fff; padding:6px 6px 6px 16px; border-radius:999px; font-size:13.5px; z-index:200; max-width:90vw;
+    transform:translate(-50%, calc(-100% - 16px)) scale(.92); opacity:0; visibility:hidden; pointer-events:none;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), opacity .22s ease, visibility 0s linear .3s;
+    touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab;}
+  #undoBar.show{transform:translate(-50%,0) scale(1); opacity:1; visibility:visible; pointer-events:auto; transition:transform .3s cubic-bezier(.2,.8,.2,1), opacity .22s ease, visibility 0s;}
+  #undoBar.dragging{transition:none; cursor:grabbing;}
   /* 顶部同步提示：悬浮胶囊。收起时透明 + visibility:hidden，阴影跟着消失（以前只往上推，阴影尾巴会露在顶边） */
   #syncBar{position:fixed; top:calc(10px + env(safe-area-inset-top, 0px)); left:50%; display:flex; align-items:center; gap:8px; background:var(--accent); color:#fff; padding:8px 16px; border-radius:999px; font-size:12.5px; z-index:60; max-width:86vw;
     transform:translate(-50%, calc(-100% - 16px)) scale(.92); opacity:0; visibility:hidden; pointer-events:none;
@@ -381,11 +386,11 @@
   #syncBar.dragging{transition:none; cursor:grabbing;}
   #syncBar .sync-spin{width:12px; height:12px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; flex:none; display:none; animation:syncspin .8s linear infinite;}
   #syncBar.busy .sync-spin{display:block;}
-  #syncBar.fail{color:#fff; font-weight:600;}
+  #syncBar.fail{background:var(--danger); color:#fff; font-weight:600;}
   #syncBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   @keyframes syncspin{to{transform:rotate(360deg);}}
   #undoBarText{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:62vw;}
-  #undoBarBtn{flex:none; background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:7px; padding:5px 12px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s;}
+  #undoBarBtn{flex:none; background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:999px; padding:5px 12px; font-size:13px; font-weight:500; cursor:pointer; transition:background .15s;}
   #undoBarBtn:hover{background:rgba(255,255,255,.32);}
   input[type=file]{display:none;}
 </style>
@@ -712,7 +717,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.77';
+const APP_VERSION='1.78';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1683,32 +1688,38 @@ async function syncNow(manual){
 /* 顶部同步条 */
 let syncBarTimer=null;
 function resetSyncBarInline(b){ clearTimeout(b._fly); b.classList.remove('dragging'); b.style.transition=''; b.style.transform=''; b.style.opacity=''; }
+/* 胶囊跟手划走（同步提示、撤销条共用）：按住拖动跟着走、越远越淡；任意方向超过 40px 或快速甩一下就飞走，否则弹回。
+   · 按下时暂停自动收起（opts.pause），弹回后恢复（opts.resume），飞走后 opts.dismiss
+   · 移动超过 6px 才抓指针，轻点里面的按钮（如撤回）不受影响 */
+function capsuleSwipe(b,opts){ let g=null;
+  b.addEventListener('pointerdown',e=>{ if(!b.classList.contains('show')) return;
+    opts.pause(); resetSyncBarInline(b);
+    g={x:e.clientX,y:e.clientY,t:performance.now(),dx:0,dy:0,moved:false,pid:e.pointerId}; });
+  b.addEventListener('pointermove',e=>{ if(!g) return;
+    g.dx=e.clientX-g.x; g.dy=e.clientY-g.y; const d=Math.hypot(g.dx,g.dy);
+    if(!g.moved){ if(d<6) return; g.moved=true; b.classList.add('dragging'); try{ b.setPointerCapture(g.pid); }catch(_){} }
+    b.style.transform=`translate(calc(-50% + ${g.dx}px), ${g.dy}px)`; b.style.opacity=String(Math.max(.25,1-d/160)); });
+  const end=()=>{ if(!g) return; const s=g; g=null;
+    if(!s.moved){ opts.resume(); return; } // 没动 = 轻点，交给 click
+    b._dragged=true; setTimeout(()=>{ b._dragged=false; },50);
+    const d=Math.hypot(s.dx,s.dy), v=d/Math.max(1,performance.now()-s.t);
+    b.classList.remove('dragging');
+    if(d>40||v>.5){ const k=320/Math.max(d,1);
+      b.style.transition='transform .22s ease-out, opacity .22s ease-out';
+      b.style.transform=`translate(calc(-50% + ${s.dx*k}px), ${s.dy*k}px)`; b.style.opacity='0';
+      b._fly=setTimeout(()=>{ b.style.transition='none'; b.classList.remove('show'); b.style.transform=''; b.style.opacity='';
+        void b.offsetWidth; b.style.transition=''; opts.dismiss(); },230); }
+    else { b.style.transform=''; b.style.opacity=''; opts.resume(); } };
+  b.addEventListener('pointerup',end); b.addEventListener('pointercancel',end);
+}
 function showSyncBar(text,busy,fail){ const b=$('#syncBar'); resetSyncBarInline(b); $('#syncBarText').textContent=text; b.classList.toggle('busy',!!busy); b.classList.toggle('fail',!!fail); b.classList.add('show'); clearTimeout(syncBarTimer); }
 function hideSyncBar(delay){ clearTimeout(syncBarTimer); syncBarTimer=setTimeout(()=>$('#syncBar').classList.remove('show'),delay||0); }
 $('#syncBar').onclick=()=>{ const b=$('#syncBar'); if(b._dragged){ b._dragged=false; return; } // 刚拖过的不算点击
   hideSyncBar(0); if(b.classList.contains('fail')) $('#settingsBtn').click(); };
-/* 胶囊跟手：按住拖动跟着走、越远越淡；任意方向拖过 40px 或快速甩一下就朝那边飞走，否则弹回 */
-(function(){ const b=$('#syncBar'); let g=null;
-  b.addEventListener('pointerdown',e=>{ if(!b.classList.contains('show')) return;
-    clearTimeout(syncBarTimer); resetSyncBarInline(b);
-    g={x:e.clientX,y:e.clientY,t:performance.now(),dx:0,dy:0,moved:false}; try{ b.setPointerCapture(e.pointerId); }catch(_){} });
-  b.addEventListener('pointermove',e=>{ if(!g) return;
-    g.dx=e.clientX-g.x; g.dy=e.clientY-g.y; const d=Math.hypot(g.dx,g.dy);
-    if(!g.moved&&d<6) return; g.moved=true; b.classList.add('dragging');
-    b.style.transform=`translate(calc(-50% + ${g.dx}px), ${g.dy}px)`; b.style.opacity=String(Math.max(.25,1-d/160)); });
-  const end=()=>{ if(!g) return; const s=g; g=null; if(!s.moved) return; // 没动 = 轻点，交给 onclick
-    b._dragged=true; setTimeout(()=>{ b._dragged=false; },50);
-    const d=Math.hypot(s.dx,s.dy), v=d/Math.max(1,performance.now()-s.t);
-    b.classList.remove('dragging');
-    if(d>40||v>.5){ const k=320/Math.max(d,1); // 沿拖动方向再飞 320px 并淡出
-      b.style.transition='transform .22s ease-out, opacity .22s ease-out';
-      b.style.transform=`translate(calc(-50% + ${s.dx*k}px), ${s.dy*k}px)`; b.style.opacity='0';
-      b._fly=setTimeout(()=>{ b.style.transition='none'; b.classList.remove('show'); b.style.transform=''; b.style.opacity='';
-        void b.offsetWidth; b.style.transition=''; },230); }
-    else { b.style.transform=''; b.style.opacity=''; // 没拖够，弹回；非进行中的提示照常定时收起
-      if(!b.classList.contains('busy')) hideSyncBar(b.classList.contains('fail')?8000:1800); } };
-  b.addEventListener('pointerup',end); b.addEventListener('pointercancel',end);
-})();
+capsuleSwipe($('#syncBar'),{
+  pause:()=>clearTimeout(syncBarTimer),
+  resume:()=>{ const b=$('#syncBar'); if(b.classList.contains('show')&&!b.classList.contains('busy')) hideSyncBar(b.classList.contains('fail')?8000:1800); }, // 进行中的提示等结果出来再收
+  dismiss:()=>clearTimeout(syncBarTimer) });
 /* 启动自动同步：本机数据已经显示出来之后，在后台拉云端逐条合并，顶部横幅报进度 */
 async function bootSync(){ const c=loadSync(); if(!c.token||!autoSyncOn()) return;
   showSyncBar('自动同步中…',true);
@@ -1752,6 +1763,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.78', d:'2026-09-13', items:[
+    '同步失败的胶囊改红底；删除后的「撤回」条也换成同款胶囊，同样能四向划走',
+  ]},
   {v:'1.77', d:'2026-09-13', items:[
     '顶栏上方留白减半；同步提示胶囊改为主题色纯色底',
   ]},
@@ -1838,11 +1852,15 @@ let toastTimer; function toast(m){const t=$('#toast'); t.textContent=m; t.classL
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), m.length>24?6000:1500);}
 let undoTimer, pendingUndo=null;
 /* 通用撤回条：任何删除都传入 文案 + 恢复函数 */
-function showUndoBar(text, undoFn){ pendingUndo=undoFn;
+function hideUndoLater(ms){ clearTimeout(undoTimer); undoTimer=setTimeout(()=>{ $('#undoBar').classList.remove('show'); pendingUndo=null; },ms); }
+function showUndoBar(text, undoFn){ pendingUndo=undoFn; const b=$('#undoBar'); resetSyncBarInline(b);
   $('#undoBarText').textContent=text;
-  $('#undoBar').classList.add('show');
-  clearTimeout(undoTimer); undoTimer=setTimeout(()=>{ $('#undoBar').classList.remove('show'); pendingUndo=null; },4000); }
-$('#undoBarBtn').onclick=async()=>{ if(!pendingUndo) return;
+  b.classList.add('show'); hideUndoLater(4000); }
+capsuleSwipe($('#undoBar'),{
+  pause:()=>clearTimeout(undoTimer),
+  resume:()=>{ if($('#undoBar').classList.contains('show')) hideUndoLater(2500); },
+  dismiss:()=>{ clearTimeout(undoTimer); pendingUndo=null; } }); // 划走就是不撤回了
+$('#undoBarBtn').onclick=async()=>{ if(!pendingUndo||$('#undoBar')._dragged) return;
   const fn=pendingUndo; pendingUndo=null; clearTimeout(undoTimer);
   await fn(); $('#undoBar').classList.remove('show'); render(); toast('已恢复'); };
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');
