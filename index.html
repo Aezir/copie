@@ -190,7 +190,8 @@
   .foot-btn.del:hover{color:var(--danger);}
   .divider{height:1px; background:var(--divider); margin:2px 8px;}
 
-  .pop{position:absolute; top:60px; right:10px; z-index:40; background:var(--sheet); border-radius:12px; box-shadow:var(--shadow); padding:8px; min-width:200px; display:none;}
+  /* 弹出菜单限宽限高：左右各留 10px、底部留 10px，内容再多也不出框，超出在菜单里滚动 */
+  .pop{position:absolute; top:60px; right:10px; z-index:40; background:var(--sheet); border-radius:12px; box-shadow:var(--shadow); padding:8px; min-width:200px; max-width:calc(100% - 20px); max-height:calc(100% - 70px); overflow-y:auto; overscroll-behavior:contain; display:none;}
   .pop.show{display:block; animation:pop .14s ease;}
   @keyframes pop{from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;}}
   .pop-title{font-size:11.5px; color:var(--faint); padding:4px 8px 8px; font-weight:600;}
@@ -723,7 +724,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.79';
+const APP_VERSION='1.80';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1813,6 +1814,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.80', d:'2026-09-13', items:[
+    '标签或保存的预选很多时，筛选菜单不再顶出屏幕：左右留边，超出部分在菜单里滚动',
+  ]},
   {v:'1.79', d:'2026-09-13', items:[
     '手机上连续快速翻长列表时，右侧会冒出主题色把手，按住上下拖就能直接跳到任意位置',
   ]},
