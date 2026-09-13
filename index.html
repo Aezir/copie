@@ -49,6 +49,12 @@
   .sb-thumb.on{opacity:1; pointer-events:auto;}
   .sb-thumb:hover, .sb-thumb.drag{background:var(--muted);}
   @media (hover:none){ .sb-thumb.on{pointer-events:none;} } /* 触屏上不抢手指，滑内容即可 */
+  /* 快速滚动把手（仅触屏）：外层是 44px 宽的隐形触摸区，里面 28x40 主题色胶囊 */
+  .fh{position:absolute; width:44px; height:56px; opacity:0; visibility:hidden; pointer-events:none; touch-action:none; transition:opacity .2s ease, visibility 0s linear .2s;}
+  .fh.on{opacity:1; visibility:visible; pointer-events:auto; transition:opacity .2s ease, visibility 0s;}
+  .fh-pill{position:absolute; right:3px; top:8px; width:28px; height:40px; border-radius:14px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; transition:transform .15s ease;}
+  .fh-pill .ic{width:18px; height:18px; fill:currentColor;}
+  .fh.drag .fh-pill{transform:scale(1.08);}
   html,body{height:100%;}
   body{
     margin:0; background:var(--appbg); color:var(--text);
@@ -697,7 +703,7 @@
 </div>
 
 <script>
-const ICONS={
+const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
   copy:'M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z',
   chevron:'M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z',
   edit:'M6.41421 15.89L16.5563 5.74785L15.1421 4.33363L5 14.4758V15.89H6.41421ZM7.24264 17.89H3V13.6473L14.435 2.21231C14.8256 1.82179 15.4587 1.82179 15.8492 2.21231L18.6777 5.04074C19.0682 5.43126 19.0682 6.06443 18.6777 6.45495L7.24264 17.89ZM3 19.89H21V21.89H3V19.89Z',
@@ -717,7 +723,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.78';
+const APP_VERSION='1.79';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1234,6 +1240,7 @@ document.addEventListener('pointerdown',e=>{ const a=document.activeElement;
         o.y.style.left=(Math.min(f.right,c.r)-pr.left-T-GAP)+'px'; o.y._len=len; o.y._track=f.height; }
       else o.y.style.display='none'; }
     else o.y.style.display='none';
+    if(fh.on&&fh.el===el) o.y.style.display='none'; // 快速把手出现时，细滑块先让位
     // 横向
     const cw=el.clientWidth, sw=el.scrollWidth;
     if(sw>cw+1){ const len=Math.max(MIN,f.width*cw/sw), left=f.left+(el.scrollLeft/(sw-cw))*(f.width-len);
@@ -1261,13 +1268,56 @@ document.addEventListener('pointerdown',e=>{ const a=document.activeElement;
     d.addEventListener('pointermove',move); d.addEventListener('pointerup',up); d.addEventListener('pointercancel',up);
   }
 
+  /* 快速滚动把手（仅触屏）
+     · 检测：最近 0.4s 平均速度 > 2.5 屏/秒，且内容 ≥ 4 屏 → 认定在连续快速翻页，右侧冒出把手
+     · 位置对应当前滚动进度；按住上下拖，内容按比例跳转（拖到顶=开头，拖到底=末尾）
+     · 停止滚动 1.5s 淡出，拖动中不消失；同一时间只给一个区域出把手 */
+  const TOUCH=matchMedia('(hover:none) and (pointer:coarse)');
+  const FH_H=40, FH_HIT=44, FH_PAD=8, FAST=2.5, LONG=4, FH_IDLE=1500;
+  const fh={el:null,on:false,dragging:false,timer:0,speed:new WeakMap(),node:document.createElement('div')};
+  fh.node.className='fh'; fh.node.innerHTML=`<div class="fh-pill">${ic('expandUpDown')}</div>`; layer.appendChild(fh.node);
+  function fhTrack(el){ const c=clipRect(el); return {c,len:Math.max(0,(c.b-c.t)-FH_H-8)}; } // 上下各留 4px
+  function fhPlace(){ const el=fh.el; if(!el) return;
+    if(!el.isConnected||!el.getClientRects().length){ fhHide(true); return; }
+    const pr=phone.getBoundingClientRect(), {c,len}=fhTrack(el), range=el.scrollHeight-el.clientHeight;
+    const pillTop=c.t+4+(range>0?el.scrollTop/range:0)*len;
+    fh.node.style.top=(pillTop-pr.top-FH_PAD)+'px'; fh.node.style.left=(c.r-pr.left-FH_HIT)+'px'; }
+  function fhLater(){ clearTimeout(fh.timer); fh.timer=setTimeout(()=>{ if(!fh.dragging) fhHide(false); },FH_IDLE); }
+  function fhHide(now){ clearTimeout(fh.timer); const was=fh.el; fh.on=false; fh.node.classList.remove('on');
+    if(now) fh.el=null; else setTimeout(()=>{ if(!fh.on) fh.el=null; },250);
+    if(was&&bars.has(was)) place(was); }
+  function fhShow(el){ if(fh.el&&fh.el!==el) fhHide(true);
+    fh.el=el; fh.on=true; fhPlace(); fh.node.classList.add('on'); if(bars.has(el)) place(el); fhLater(); }
+  function fhSpeed(el){ if(!TOUCH.matches||fh.dragging) return;
+    const ch=el.clientHeight; if(ch<120||el.scrollHeight<ch*LONG) return; // 小区域、短内容不出把手
+    const now=performance.now(); let a=fh.speed.get(el); if(!a){ a=[]; fh.speed.set(el,a); }
+    a.push([now,el.scrollTop]); while(a.length&&now-a[0][0]>400) a.shift();
+    if(a.length<4) return; const dt=now-a[0][0]; if(dt<120) return;
+    if(Math.abs(el.scrollTop-a[0][1])/dt*1000<=FAST*ch) return;
+    // 还要连续 3 段都快：代码一下子改滚动位置（如重渲染跳回顶部）只有一段大跳变，不算"连续快速翻页"
+    let run=0; for(let i=a.length-1;i>0&&run<3;i--){ const d=a[i][0]-a[i-1][0];
+      if(d>0&&Math.abs(a[i][1]-a[i-1][1])/d*1000>FAST*ch) run++; else break; }
+    if(run>=3) fhShow(el); }
+  fh.node.addEventListener('pointerdown',e=>{ if(!fh.on||!fh.el) return;
+    e.preventDefault(); e.stopPropagation(); fh.dragging=true; fh.node.classList.add('drag'); clearTimeout(fh.timer);
+    try{ fh.node.setPointerCapture(e.pointerId); }catch(_){}
+    const el=fh.el, off=e.clientY-fh.node.querySelector('.fh-pill').getBoundingClientRect().top; // 按住把手的哪个位置，就保持那个相对位置
+    const move=ev=>{ const {c,len}=fhTrack(el), range=el.scrollHeight-el.clientHeight; if(len<=0||range<=0) return;
+      const r=Math.max(0,Math.min(1,(ev.clientY-off-(c.t+4))/len)); el.scrollTop=r*range; fhPlace(); };
+    const up=()=>{ fh.dragging=false; fh.node.classList.remove('drag');
+      fh.node.removeEventListener('pointermove',move); fh.node.removeEventListener('pointerup',up); fh.node.removeEventListener('pointercancel',up); fhLater(); };
+    fh.node.addEventListener('pointermove',move); fh.node.addEventListener('pointerup',up); fh.node.addEventListener('pointercancel',up);
+  });
+
   // 顶层捕获：任何元素滚动都会经过这里（scroll 不冒泡，但捕获阶段能拿到）
   document.addEventListener('scroll',e=>{ const el=e.target;
     if(!(el instanceof Element)||el===layer) return;
     show(el); bars.forEach((_,other)=>{ if(other!==el) place(other); }); // 父容器滚动时，子区域的滑块跟着挪
+    if(fh.on&&fh.el){ fhPlace(); if(fh.el===el) fhLater(); }            // 把手跟着挪，还在滚就续命
+    fhSpeed(el);
   },{capture:true,passive:true});
   window.addEventListener('resize',()=>bars.forEach((_,el)=>place(el)));
-  window.__sb={bars,show,place}; // 调试用
+  window.__sb={bars,show,place,fh}; // 调试用
 })();
 
 /* ---------- 编辑弹层 ---------- */
@@ -1763,6 +1813,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.79', d:'2026-09-13', items:[
+    '手机上连续快速翻长列表时，右侧会冒出主题色把手，按住上下拖就能直接跳到任意位置',
+  ]},
   {v:'1.78', d:'2026-09-13', items:[
     '同步失败的胶囊改红底；删除后的「撤回」条也换成同款胶囊，同样能四向划走',
   ]},
