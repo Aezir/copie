@@ -704,7 +704,7 @@ const ICONS={
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.71';
+const APP_VERSION='1.72';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1090,14 +1090,16 @@ $('#removeNameConfirm').onclick=async()=>{ const pending=pendingNameRemoval; if(
 $('#list').addEventListener('pointerdown',e=>{
   if(selMode) return;
   const row=e.target.closest('.blk .row'); if(!row) return;
-  if(e.target.closest('button')||e.target.closest('[contenteditable="true"]')) return;
+  // 正文/名称是可编辑文字、占满整行；只在它正处于编辑状态（有光标）时才让给编辑，否则照样能起手左滑
+  const ed=e.target.closest('[contenteditable="true"]');
+  if(e.target.closest('button')||(ed&&ed===document.activeElement)) return;
   const blk=row.closest('.blk');
   blkSwipe={blk,row,x0:e.clientX,y0:e.clientY,base:blk.classList.contains('blk-open')?-104:0,moved:false,horizontal:false,pid:e.pointerId};
 });
 $('#list').addEventListener('pointermove',e=>{
   if(!blkSwipe) return;
   const dx=e.clientX-blkSwipe.x0, dy=e.clientY-blkSwipe.y0;
-  if(!blkSwipe.moved){ if(Math.abs(dx)>6||Math.abs(dy)>6){ blkSwipe.moved=true; blkSwipe.horizontal=Math.abs(dx)>Math.abs(dy)*1.2;
+  if(!blkSwipe.moved){ if(Math.abs(dx)>6||Math.abs(dy)>6){ blkSwipe.moved=true; blkSwipe.horizontal=Math.abs(dx)>Math.abs(dy);
     if(blkSwipe.horizontal){ if(openBlk&&openBlk!==blkSwipe.blk) closeBlk(); blkSwipe.blk.classList.add('blk-dragging');
       try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(_){}
       try{$('#list').setPointerCapture(blkSwipe.pid);}catch(_){} } } }
@@ -1639,6 +1641,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.72', d:'2026-09-13', items:[
+    '文本块左滑更好触发：按在文字上也能滑出标签和删除（正在编辑的那块除外），斜着划也更容易识别',
+  ]},
   {v:'1.71', d:'2026-09-13', items:[
     '安卓 App 里用返回键或边缘返回手势：先关弹窗、设置页、筛选菜单、多选，都关完了才退出 App',
   ]},
