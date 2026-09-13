@@ -498,6 +498,10 @@
             <span>显示悬浮球</span>
             <label class="switch"><input type="checkbox" id="bubbleToggle"><span class="track"></span></label>
           </div>
+          <div class="bubble-row" id="panelInputRow" style="display:none">
+            <span>悬浮窗内允许打字<small style="display:block;color:var(--faint);font-size:11.5px">点进悬浮窗的输入框时才弹键盘；关掉则永远不抢焦点</small></span>
+            <label class="switch"><input type="checkbox" id="panelInputToggle"><span class="track"></span></label>
+          </div>
           <div class="bubble-row"><span>悬浮球大小</span><span class="size-val" id="bubbleSizeVal">48</span></div>
           <input type="range" id="bubbleSize" class="size-range" min="36" max="76" step="2" value="48">
         </div>
@@ -727,7 +731,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.82';
+const APP_VERSION='1.83';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1516,7 +1520,7 @@ $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card
   <div class="a-row">版本更新请点「关于」标题旁的图标查看；云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
-  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.74/copie-1.74.apk" target="_blank">
+  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.75/copie-1.75.apk" target="_blank">
     <div class="a-dl-icon"><svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg></div>
     <div class="a-dl-info"><div class="a-dl-name">下载 Android App</div><div class="a-dl-ver" id="aboutDlVer">Copie v${APP_VERSION}</div></div>
     <div class="a-dl-arr"><svg viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></div>
@@ -1809,6 +1813,10 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.83', d:'2026-09-13', items:[
+    '壳 1.75：悬浮窗默认不抢键盘焦点，底下 App 照常弹键盘、能粘贴；点进悬浮窗的输入框时才临时弹键盘',
+    '设置 → 悬浮球：新增「悬浮窗内允许打字」开关，关掉则悬浮窗永远不抢焦点',
+  ]},
   {v:'1.82', d:'2026-09-13', items:[
     '手势重写：条目、文本块、筛选预选的左滑和长按拖出合并成一套总管，规则只写一处',
     '修复手机上按在文本块文字上左滑只抖一下、拉不出标签和删除的问题',
@@ -1936,12 +1944,25 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   $('#bubbleSec').style.display='';
   $('#bubbleToggle').checked=!!AndroidBridge.isBubbleOn();
   $('#bubbleToggle').onchange=e=>AndroidBridge.setBubble(!!e.target.checked);
+  if(AndroidBridge.isPanelInputOn){ $('#panelInputRow').style.display='';
+    $('#panelInputToggle').checked=!!AndroidBridge.isPanelInputOn();
+    $('#panelInputToggle').onchange=e=>AndroidBridge.setPanelInput(!!e.target.checked); }
   try{ AndroidBridge.setPrivacy&&AndroidBridge.setPrivacy(loadPrivacy()); }catch(_){} // 把隐私状态同步给原生悬浮层
   try{ const sz=AndroidBridge.getBubbleSize?AndroidBridge.getBubbleSize():48;
     $('#bubbleSize').value=sz; $('#bubbleSizeVal').textContent=sz;
     $('#bubbleSize').oninput=ev=>{ $('#bubbleSizeVal').textContent=ev.target.value; };
     $('#bubbleSize').onchange=ev=>{ AndroidBridge.setBubbleSize&&AndroidBridge.setBubbleSize(parseInt(ev.target.value,10)); };
   }catch(_){}
+} }catch(_){}
+
+/* ---------- 悬浮面板打字：输入框获焦时让壳把窗口切成可获焦并弹键盘，失焦后还回去（壳里非面板那份网页调了也无效） ----------
+   失焦→获焦之间隔一拍再判断，输入框之间切换不会让键盘闪一下 */
+try{ if(window.AndroidBridge&&AndroidBridge.wantInput){
+  const editable=el=>!!(el&&el.closest&&el.closest('input,textarea,[contenteditable="true"]'));
+  let offTimer=0;
+  document.addEventListener('focusin',e=>{ if(!editable(e.target)) return; clearTimeout(offTimer); try{ AndroidBridge.wantInput(true); }catch(_){} });
+  document.addEventListener('focusout',e=>{ if(!editable(e.target)) return; clearTimeout(offTimer);
+    offTimer=setTimeout(()=>{ if(!editable(document.activeElement)){ try{ AndroidBridge.wantInput(false); }catch(_){} } },150); });
 } }catch(_){}
 
 /* ---------- 悬浮横条：长按条目拖出屏幕（仅壳 App 内生效） ---------- */
