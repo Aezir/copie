@@ -285,6 +285,8 @@
   .snap-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 2px; border-bottom:1px solid var(--divider);}
   .snap-row:last-child{border-bottom:none;}
   .snap-row .btn{padding:7px 12px; flex:0 0 auto;}
+  [hidden]{display:none!important;}
+  .seg-pill button.dim{opacity:.45;}
   .sync-hd{display:flex; align-items:center; gap:5px;}
   .help-btn{border:none; background:transparent; color:var(--faint); cursor:pointer; width:20px; height:20px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%;}
   .help-btn .ic{width:16px; height:16px;}
@@ -479,11 +481,26 @@
       <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
 
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
+      <div class="set-card">
+        <div class="set-row">
+          <div class="rt"><div class="rt-main">同步渠道</div><div class="rt-sub" id="provSub">GitHub 私有仓库 · 加密存储</div></div>
+          <div class="seg-pill" id="provSeg">
+            <button data-prov="github">GitHub</button>
+            <button data-prov="jgy">坚果云</button>
+          </div>
+        </div>
+      </div>
       <div class="menu-item" id="syncNowItem"><svg class="ic" viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.22842L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.8108 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7716L18.5374 19.5674Z"/></svg><div class="mt">立即同步<small>拉云端、逐条合并、再上传；不会整份覆盖</small></div></div>
       <div class="menu-item" id="autoSyncItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C14.7486 4 17.1749 5.38626 18.6156 7.5H16V9.5H22V3.5H20V5.99936C18.1762 3.57166 15.2724 2 12 2C6.47715 2 2 6.47715 2 12H4C4 7.58172 7.58172 4 12 4ZM20 12C20 16.4183 16.4183 20 12 20C9.25144 20 6.82508 18.6137 5.38443 16.5H8V14.5H2V20.5H4V18.0006C5.82381 20.4283 8.72764 22 12 22C17.5228 22 22 17.5228 22 12H20Z"/></svg><div class="mt">自动同步<small>打开 App 时、改动停手 1.5 秒后，自动做合并同步</small></div><label class="switch"><input type="checkbox" id="autoSyncToggle"><span class="track"></span></label></div>
       <div class="sync-box">
-        <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
-        <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
+        <div id="ghFields">
+          <input class="field-in" id="syncToken" type="password" placeholder="粘贴 GitHub token（fine-grained，只授权 copie-data 仓库）" autocomplete="off" spellcheck="false">
+          <input class="field-in" id="syncPass" type="password" placeholder="设置主密码（加密用，换设备填同一个；丢了解不开）" autocomplete="off" spellcheck="false">
+        </div>
+        <div id="jgyFields" hidden>
+          <input class="field-in" id="davUser" type="email" placeholder="坚果云账号（注册邮箱）" autocomplete="off" spellcheck="false">
+          <input class="field-in" id="davPass" type="password" placeholder="应用密码（坚果云网页 → 安全选项 → 第三方应用管理 生成）" autocomplete="off" spellcheck="false">
+        </div>
         <div class="sync-btns">
           <button class="btn primary" id="syncConnect">连接并同步</button>
           <button class="btn ghost" id="syncClear">清除</button>
@@ -501,6 +518,10 @@
           <div class="bubble-row" id="panelInputRow" style="display:none">
             <span>悬浮窗内允许打字<small style="display:block;color:var(--faint);font-size:11.5px">点进悬浮窗的输入框时才弹键盘；关掉则永远不抢焦点</small></span>
             <label class="switch"><input type="checkbox" id="panelInputToggle"><span class="track"></span></label>
+          </div>
+          <div class="bubble-row" id="collectRow" style="display:none">
+            <span>双击进入收集模式<small style="display:block;color:var(--faint);font-size:11.5px">双击球变「+」，复制完点一下 + 就收进 Copie，再双击变回；开着时单击会稍等一下再打开面板</small></span>
+            <label class="switch"><input type="checkbox" id="collectToggle"><span class="track"></span></label>
           </div>
           <div class="bubble-row"><span>悬浮球大小</span><span class="size-val" id="bubbleSizeVal">48</span></div>
           <input type="range" id="bubbleSize" class="size-range" min="36" max="76" step="2" value="48">
@@ -649,10 +670,38 @@
   <div class="sheet-mask" id="helpMask">
     <div class="sheet">
       <div class="help-head">
-        <h2>云同步 · 教程 &amp; 原理</h2>
+        <h2 id="helpTitle">云同步 · 教程 &amp; 原理</h2>
         <button class="ghost-ico" id="helpClose" aria-label="关闭"><svg class="ic" viewBox="0 0 24 24"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"/></svg></button>
       </div>
-      <div class="help-body">
+      <div class="help-body" id="helpJgy" hidden>
+        <h4>一句话</h4>
+        <p>数据存成一个<b>普通 JSON 文件</b>放在你的坚果云里，<b>不加密</b>，在坚果云网页或 App 里能直接打开看。同步时<b>逐条合并</b>，不会整份覆盖。<b>仅在 Copie App 内可用</b>。</p>
+
+        <h4>① 怎么开（只需一次）</h4>
+        <ol>
+          <li>电脑打开 <b>jianguoyun.com</b> 登录 → 右上角<b>账户信息</b> → <b>安全选项</b></li>
+          <li>找到<b>第三方应用管理</b> → <b>添加应用</b>，名称随便填（比如 Copie）→ <b>生成密码</b>，复制它</li>
+          <li>回到这里：第一个框填<b>坚果云账号（注册邮箱）</b>，第二个框填刚才的<b>应用密码</b>（不是登录密码）→ 点<b>连接并同步</b></li>
+        </ol>
+
+        <h4>② 文件在哪</h4>
+        <p>坚果云根目录会多一个 <code>Copie</code> 文件夹，里面的 <code>copie-data.json</code> 就是全部数据。<code>entries</code> 是条目，<code>deleted</code> 是删除记录。</p>
+
+        <h4>③ 换设备</h4>
+        <p>新设备的 Copie App → 同步渠道选坚果云 → 填<b>同一个账号 + 应用密码</b> → 连接并同步。</p>
+
+        <h4>④ 同步逻辑</h4>
+        <ul>
+          <li><b>逐条合并</b>：同一条谁改得晚用谁的；一边有另一边没有的补上；删掉的条目带"删除记录"同步到其他设备</li>
+          <li><b>自动同步</b>：打开 App、改动停手 1.5 秒后自动合并同步；关掉就只在点「立即同步」时同步</li>
+          <li><b>安全阀</b>：同步会让本机少掉一半以上条目时先问你；本机为空却要清掉云端也会先问；同步前自动留本机快照</li>
+          <li>请求由 App 直接发给坚果云，不经过任何第三方服务器；账号和应用密码只存在本机</li>
+        </ul>
+
+        <h4>注意</h4>
+        <div class="tip">• 文件是<b>明文</b>，安全性等于你坚果云账号的安全性；特别敏感的 key 可以考虑用 GitHub 渠道（加密）<br>• 应用密码可以在第三方应用管理里随时删除，删了 Copie 就连不上了<br>• 坚果云自带文件历史版本，误删能在网页里找回旧版本<br>• 手动改 JSON 时别改坏格式，否则同步会报错<br>• 浏览器里打开网页版用不了坚果云：坚果云不允许网页跨域访问，只能由 App 原生发请求</div>
+      </div>
+      <div class="help-body" id="helpGh">
         <h4>一句话</h4>
         <p>数据<b>加密后</b>才上云，云端只见密文。打开 App <b>先读本机</b>；同步时<b>逐条合并</b>（按条取新、删除也会同步），不会整份覆盖。</p>
 
@@ -731,7 +780,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.83';
+const APP_VERSION='1.84';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1592,10 +1641,21 @@ async function importFromText(text, src){
 $('#importItem').onclick=()=>$('#fileInp').click();
 $('#fileInp').onchange=async e=>{ const file=e.target.files[0]; if(!file) return;
   await importFromText(await file.text(), '文件'); e.target.value=''; };
+/* 调原生的异步桥：原生做完后回调 window.__nativeCb(id, 结果对象) */
+const nativeCbs={}; let nativeSeq=0;
+window.__nativeCb=(id,res)=>{ const f=nativeCbs[id]; if(f){ delete nativeCbs[id]; f(res||{}); } };
+function nativeAsync(fn,...args){ return new Promise((res,rej)=>{ const id='n'+(++nativeSeq); nativeCbs[id]=res;
+  try{ AndroidBridge[fn](id,...args); }catch(e){ delete nativeCbs[id]; rej(e); } }); }
+/* 读剪贴板：App 里走原生（WebView 不支持网页读剪贴板），浏览器走标准接口 */
+async function readClipText(){
+  if(window.AndroidBridge&&AndroidBridge.readClip){ const r=await nativeAsync('readClip');
+    if(r.ok) return r.text||''; throw new Error(r.err||'读取失败'); }
+  return await navigator.clipboard.readText();
+}
 $('#importClipItem').onclick=async()=>{
   let text='';
-  try{ text=await navigator.clipboard.readText(); }
-  catch(err){ toast('读不到剪贴板（未授权或不支持），请改用「导入文件」'); return; }
+  try{ text=await readClipText(); }
+  catch(err){ toast(window.AndroidBridge&&AndroidBridge.readClip ? '读不到剪贴板：'+(err.message||err) : '浏览器没给剪贴板权限，请改用「导入文件」'); return; }
   if(!text || !text.trim()){ toast('剪贴板是空的，先复制 JSON 再来'); return; }
   await importFromText(text, '剪贴板内容');
 };
@@ -1606,9 +1666,29 @@ let applyingRemote=false, syncing=false, autoPushTimer=null;
 function loadSync(){ try{ return JSON.parse(localStorage.getItem(SYNC_KEY))||{}; }catch(_){ return {}; } }
 function saveSyncCfg(c){ localStorage.setItem(SYNC_KEY, JSON.stringify(c)); }
 function autoSyncOn(){ return loadSync().auto!==false; }
+/* 同步渠道：github（加密存私有仓）/ jgy（坚果云 WebDAV，明文 JSON，仅 App 内——坚果云不允许网页跨域，靠原生发请求） */
+const provOf=c=>c.provider==='jgy'?'jgy':'github';
+const isLinked=c=>provOf(c)==='jgy' ? !!(c.davUser&&c.davPass) : !!c.token;
+function hasDav(){ try{ return !!(window.AndroidBridge&&AndroidBridge.davRequest); }catch(_){ return false; } }
+const OK_SVG='<svg style="width:14px;height:14px;vertical-align:middle;fill:var(--ok);margin-right:4px;margin-top:-2px" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"/></svg>';
+function showProv(p){
+  document.querySelectorAll('#provSeg button').forEach(b=>{ b.classList.toggle('on',b.dataset.prov===p); if(b.dataset.prov==='jgy') b.classList.toggle('dim',!hasDav()); });
+  $('#ghFields').hidden=p!=='github'; $('#jgyFields').hidden=p!=='jgy';
+  $('#provSub').textContent=p==='jgy'?'坚果云 WebDAV · 网盘里能直接看':'GitHub 私有仓库 · 加密存储';
+}
+document.querySelectorAll('#provSeg button').forEach(b=>b.onclick=()=>{ const p=b.dataset.prov;
+  if(p==='jgy'&&!hasDav()){ toast('坚果云只能在 Copie App 里用（浏览器被坚果云跨域限制挡住）'); return; }
+  const c=loadSync(); if(provOf(c)===p) return;
+  c.provider=p; delete c.lastErr; saveSyncCfg(c); fillSyncForm();
+  toast(p==='jgy'?'已切到坚果云':'已切到 GitHub'); });
 function fillSyncForm(){ const c=loadSync(); if($('#syncToken')) $('#syncToken').value=c.token||''; if($('#syncPass')) $('#syncPass').value=c.pass||'';
+  $('#davUser').value=c.davUser||''; $('#davPass').value=c.davPass||''; showProv(provOf(c));
   if($('#autoSyncToggle')) $('#autoSyncToggle').checked=autoSyncOn(); updateSyncNote(); }
 function updateSyncNote(){ const c=loadSync(), el=$('#syncNote'); if(!el) return;
+  if(provOf(c)==='jgy'){
+    if(isLinked(c)) el.innerHTML=OK_SVG+'<span style="color:var(--ok)">已连接坚果云</span>：<b>'+esc(c.davUser)+'</b>'+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>数据在坚果云 <code>Copie/copie-data.json</code>，明文 JSON，可直接打开查看。'+(hasDav()?'':'<br>⚠️ 当前不在 App 内，坚果云同步不可用。');
+    else el.innerHTML='在坚果云网页 <b>账户信息 → 安全选项 → 第三方应用管理</b> 生成一个<b>应用密码</b>，连同账号邮箱一起填。数据以明文 JSON 存进你的坚果云，<b>仅 App 内可用</b>；账号和密码只存本机。';
+    return; }
   if(c.token){ el.innerHTML='<svg style="width:14px;height:14px;vertical-align:middle;fill:var(--ok);margin-right:4px;margin-top:-2px" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11.0026 16L18.0737 8.92893L16.6595 7.51472L11.0026 13.1716L8.17421 10.3431L6.75999 11.7574L11.0026 16Z"/></svg><span style="color:var(--ok)">已连接</span>'+(c.repo?'：<b>'+esc(c.repo)+'</b>':'')+(c.lastSync?' · 上次同步 '+new Date(c.lastSync).toLocaleString():'')+(c.lastErr?'<br>⚠️ 上次同步失败：'+esc(c.lastErr):'')+'<br>打开 App 先显示本机数据，再在后台自动逐条合并（顶部会提示）；也可随时点上面「立即同步」。数据<b>加密</b>后上传，换设备填<b>同一个 token + 同一个主密码</b>。'; }
   else{ el.innerHTML='先在 GitHub 手动建一个<b>私有</b>仓库 <code>copie-data</code>，再生成 <b>fine-grained</b> token（只授权这一个仓库、Contents 读写），连同一个<b>主密码</b>一起填。数据会<b>加密</b>后才上云；Token 与主密码都<b>只存本机浏览器</b>，不进代码、不上云。'; }
 }
@@ -1691,6 +1771,35 @@ async function applyMerged(merged){
   } finally{ applyingRemote=false; }
   entries=merged; render();
 }
+/* ---- 坚果云 WebDAV：请求交给壳 App 原生发（绕开跨域），文件是明文 JSON ---- */
+const DAV_DIR='Copie/', DAV_FILE='Copie/copie-data.json';
+async function dav(c,method,path,body){
+  if(!hasDav()) throw new Error('坚果云同步只能在 Copie App 里用');
+  const r=await nativeAsync('davRequest',method,path,c.davUser||'',c.davPass||'',body||'');
+  if(r.err) throw new Error('连不上坚果云：'+r.err); return r; }
+const davOk=r=>r.status>=200&&r.status<300;
+function davFail(step,r){ const hint = r.status===401 ? '账号或应用密码不对（要填「第三方应用管理」里生成的应用密码，不是登录密码）'
+    : r.status===403 ? '坚果云拒绝了请求（可能请求太频繁，稍后再试）'
+    : r.status===507 ? '坚果云空间不足' : '';
+  return new Error(step+'失败 HTTP '+r.status+(hint?'。'+hint:'')); }
+async function davPull(c){
+  const r=await dav(c,'GET',DAV_FILE);
+  if(r.status===404) return null;
+  if(!davOk(r)) throw davFail('读坚果云文件',r);
+  let raw; try{ raw=JSON.parse(r.body); }catch(_){ throw new Error('坚果云里的 copie-data.json 不是有效 JSON（手动改坏了？可在坚果云历史版本里找回）'); }
+  const list=Array.isArray(raw)?raw:(raw&&Array.isArray(raw.entries)?raw.entries:[]);
+  return {savedAt:(raw&&raw.savedAt)||0, entries:list, deleted:(raw&&raw.deleted&&typeof raw.deleted==='object')?raw.deleted:{}};
+}
+async function davPush(c, list, deleted){
+  const body=JSON.stringify({app:'copie',version:5,savedAt:c.savedAt||now(),count:list.length,entries:list,deleted:deleted||{}},null,2);
+  let r=await dav(c,'PUT',DAV_FILE,body);
+  if(r.status===409||r.status===404){ // 文件夹还没建：先建 Copie/ 再传
+    const m=await dav(c,'MKCOL',DAV_DIR);
+    if(!davOk(m)&&m.status!==405) throw davFail('新建文件夹 Copie',m);
+    r=await dav(c,'PUT',DAV_FILE,body); }
+  if(!davOk(r)) throw davFail('上传到坚果云',r);
+  c.lastSync=now(); saveSyncCfg(c);
+}
 async function ensureRepo(c){
   const r=await fetch('https://api.github.com/repos/'+c.repo,{headers:ghH(c)});
   if(r.ok) return;
@@ -1700,14 +1809,15 @@ async function ensureRepo(c){
 
 /* 同步 = 拉云端 → 与本机逐条合并 → 有差异才写本机 / 才上传。manual=true 时会弹确认、报结果 */
 async function syncNow(manual){
-  const c=loadSync(); if(!c.token){ if(manual) toast('先在下面填 token 和主密码'); return {skip:true}; }
+  const c=loadSync(), jgy=provOf(c)==='jgy';
+  if(!isLinked(c)){ if(manual) toast(jgy?'先在下面填坚果云账号和应用密码':'先在下面填 token 和主密码'); return {skip:true}; }
   if(syncing){ if(manual) toast('正在同步…'); return {skip:true}; } syncing=true;
   if(manual) toast('同步中…');
   try{
-    if(!c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
+    if(!jgy && !c.repo){ const u=await fetch('https://api.github.com/user',{headers:ghH(c)});
       if(!u.ok) throw await ghFail('验证 token',u);
       c.repo=(await u.json()).login+'/copie-data'; c.path='copie-data.json'; c.branch='main'; saveSyncCfg(c); await ensureRepo(c); }
-    const remote=await remotePull(c);
+    const remote=jgy ? await davPull(c) : await remotePull(c);
     const rEntries=remote?remote.entries.map(normalize):[], rDeleted=remote?remote.deleted:{};
     const tomb=mergeTomb(loadTomb(), rDeleted);
     const merged=mergeSets(entries, rEntries, tomb);
@@ -1727,7 +1837,7 @@ async function syncNow(manual){
     const remoteChanged=!remote || fingerprint(merged)!==fingerprint(rEntries) || JSON.stringify(tomb)!==JSON.stringify(rDeleted||{});
     if(localChanged){ await snapshot('sync'); await applyMerged(merged); }
     saveTomb(tomb);
-    if(remoteChanged){ c.savedAt=now(); saveSyncCfg(c); await remotePush(c, merged, tomb); }
+    if(remoteChanged){ c.savedAt=now(); saveSyncCfg(c); if(jgy) await davPush(c, merged, tomb); else await remotePush(c, merged, tomb); }
     c.linked=true; c.lastSync=now(); delete c.lastErr; saveSyncCfg(c); updateSyncNote();
     if(manual) toast((localChanged||remoteChanged)?('已同步，本机 '+merged.length+' 条'):'已是最新');
     return {ok:true, changed:localChanged||remoteChanged, count:merged.length};
@@ -1771,7 +1881,7 @@ capsuleSwipe($('#syncBar'),{
   resume:()=>{ const b=$('#syncBar'); if(b.classList.contains('show')&&!b.classList.contains('busy')) hideSyncBar(b.classList.contains('fail')?8000:1800); }, // 进行中的提示等结果出来再收
   dismiss:()=>clearTimeout(syncBarTimer) });
 /* 启动自动同步：本机数据已经显示出来之后，在后台拉云端逐条合并，顶部横幅报进度 */
-async function bootSync(){ const c=loadSync(); if(!c.token||!autoSyncOn()) return;
+async function bootSync(){ const c=loadSync(); if(!isLinked(c)||!autoSyncOn()) return;
   showSyncBar('自动同步中…',true);
   const r=await syncNow(false);
   if(!r||r.skip){ hideSyncBar(0); return; }
@@ -1779,12 +1889,16 @@ async function bootSync(){ const c=loadSync(); if(!c.token||!autoSyncOn()) retur
   else{ showSyncBar('同步失败：'+r.msg+'（点这里去设置）',false,true); hideSyncBar(8000); } }
 
 /* 任何本地数据写入后：记时间；若开了自动同步则防抖 1.5s 做一次合并同步 */
-function touched(){ if(applyingRemote) return; const c=loadSync(); if(!c.token) return;
+function touched(){ if(applyingRemote) return; const c=loadSync(); if(!isLinked(c)) return;
   c.savedAt=now(); saveSyncCfg(c);
   if(!autoSyncOn()) return;
   clearTimeout(autoPushTimer); autoPushTimer=setTimeout(()=>syncNow(false),1500); }
 
-$('#syncConnect').onclick=async()=>{ const tok=$('#syncToken').value.trim(); const pass=$('#syncPass').value;
+$('#syncConnect').onclick=async()=>{
+  if(provOf(loadSync())==='jgy'){ const u=$('#davUser').value.trim(), p=$('#davPass').value.trim();
+    if(!u){ toast('先填坚果云账号'); return; } if(!p){ toast('先填应用密码'); return; }
+    const c=loadSync(); c.davUser=u; c.davPass=p; saveSyncCfg(c); updateSyncNote(); await syncNow(true); fillSyncForm(); return; }
+  const tok=$('#syncToken').value.trim(); const pass=$('#syncPass').value;
   if(!tok){ toast('先粘贴 token'); return; } if(!pass){ toast('先设置主密码'); return; }
   const c=loadSync(); if(c.token!==tok){ delete c.repo; delete c._sha; } c.token=tok; c.pass=pass; saveSyncCfg(c); updateSyncNote(); await syncNow(true); fillSyncForm(); };
 $('#syncClear').onclick=()=>{ if(confirm('清除本机同步配置？（云端数据不会删）')){ localStorage.removeItem(SYNC_KEY); fillSyncForm(); toast('已清除'); } };
@@ -1813,6 +1927,11 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.84', d:'2026-09-14', items:[
+    '云同步新增「同步渠道」：可选 GitHub（加密）或<b>坚果云</b>（明文 JSON，网盘里能直接看；仅 App 内可用）；「云同步」旁的 ? 按渠道显示对应教程',
+    '壳 1.76：悬浮球「收集模式」——设置里打开后，双击球变 +，复制完点一下 + 就自动新建一条（标题为日期时间），再双击变回',
+    '修复 App 里「从剪贴板导入」读不到剪贴板：改由原生读取，悬浮面板里也能用',
+  ]},
   {v:'1.83', d:'2026-09-13', items:[
     '壳 1.75：悬浮窗默认不抢键盘焦点，底下 App 照常弹键盘、能粘贴；点进悬浮窗的输入框时才临时弹键盘',
     '设置 → 悬浮球：新增「悬浮窗内允许打字」开关，关掉则悬浮窗永远不抢焦点',
@@ -1905,7 +2024,10 @@ $('#importHelp').onclick=()=>$('#importHelpMask').classList.add('show');
 $('#importHelpClose').onclick=()=>$('#importHelpMask').classList.remove('show');
 $('#importHelpMask').addEventListener('click',e=>{ if(e.target.id==='importHelpMask') e.currentTarget.classList.remove('show'); });
 $('#copyPromptBtn').onclick=async()=>{ await copyText($('#aiPrompt').innerText); toast('Prompt 已复制'); };
-$('#syncHelp').onclick=()=>$('#helpMask').classList.add('show');
+$('#syncHelp').onclick=()=>{ const jgy=provOf(loadSync())==='jgy';
+  $('#helpGh').hidden=jgy; $('#helpJgy').hidden=!jgy;
+  $('#helpTitle').innerHTML=(jgy?'坚果云同步':'GitHub 云同步')+' · 教程 &amp; 原理';
+  $('#helpMask').classList.add('show'); };
 $('#helpClose').onclick=()=>$('#helpMask').classList.remove('show');
 $('#helpMask').addEventListener('click',e=>{ if(e.target.id==='helpMask') e.currentTarget.classList.remove('show'); });
 
@@ -1940,10 +2062,21 @@ $('#tagMask').addEventListener('click',e=>{if(e.target.id==='tagMask') e.current
 /* ---------- 壳 App 联动：外部改动后重读本地库刷新 + 设置页悬浮球开关 ---------- */
 async function refreshFromDB(){ try{ const rawAll=await getAll(); entries=rawAll.map(normalize); render(); }catch(_){} }
 window.refreshFromDB=refreshFromDB;
+/* 悬浮球收集模式：壳读到剪贴板后调这里，新建一条（标题=日期时间，无名称无标签） */
+let dbReadyRes; const dbReady=new Promise(r=>dbReadyRes=r);
+window.copieAddClip=async function(text){ await dbReady; text=String(text||''); if(!text.trim()) return 0;
+  try{ entries=(await getAll()).map(normalize); }catch(_){} // 这份网页可能在后台放了很久，先重读本机库
+  const d=new Date(), p=n=>String(n).padStart(2,'0'), t=now();
+  const ent=normalize({id:uid(), title:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,
+    tags:[], blocks:[{key:'',value:text}], createdAt:t, updatedAt:t});
+  entries.push(ent); await put(ent); render(); return 1; };
 try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   $('#bubbleSec').style.display='';
   $('#bubbleToggle').checked=!!AndroidBridge.isBubbleOn();
   $('#bubbleToggle').onchange=e=>AndroidBridge.setBubble(!!e.target.checked);
+  if(AndroidBridge.setCollect){ $('#collectRow').style.display='';
+    $('#collectToggle').checked=!!AndroidBridge.isCollectOn();
+    $('#collectToggle').onchange=e=>AndroidBridge.setCollect(!!e.target.checked); }
   if(AndroidBridge.isPanelInputOn){ $('#panelInputRow').style.display='';
     $('#panelInputToggle').checked=!!AndroidBridge.isPanelInputOn();
     $('#panelInputToggle').onchange=e=>AndroidBridge.setPanelInput(!!e.target.checked); }
@@ -1990,7 +2123,7 @@ render();
   try{ for(const r of rawAll){ const legacyBlocks=Array.isArray(r.blocks)&&r.blocks.some(b=>typeof b==='string'||!b||typeof b!=='object'||!('key' in b)||!('value' in b));
     if((r.fields&&!r.blocks) || legacyBlocks || r.fav===undefined || r.pinned===undefined){ await put(findEnt(r.id)); } } }
   finally{ applyingRemote=false; }
-  render();
+  render(); dbReadyRes();
   if(pendingShare){ openEdit(null); $('#fTitle').value=pendingShare.title;
     $('#blocksWrap').innerHTML=''; addBlkRow(pendingShare.text); pendingShare=null; }
   snapshotDaily(); // 每天首次打开留一份本机快照
