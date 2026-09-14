@@ -780,7 +780,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.84';
+const APP_VERSION='1.85';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1784,7 +1784,7 @@ function davFail(step,r){ const hint = r.status===401 ? '账号或应用密码�
   return new Error(step+'失败 HTTP '+r.status+(hint?'。'+hint:'')); }
 async function davPull(c){
   const r=await dav(c,'GET',DAV_FILE);
-  if(r.status===404) return null;
+  if(r.status===404||r.status===409) return null; // 坚果云：文件所在文件夹还不存在时回 409（不是 404），同样当"云端还没数据"，上传时再建文件夹
   if(!davOk(r)) throw davFail('读坚果云文件',r);
   let raw; try{ raw=JSON.parse(r.body); }catch(_){ throw new Error('坚果云里的 copie-data.json 不是有效 JSON（手动改坏了？可在坚果云历史版本里找回）'); }
   const list=Array.isArray(raw)?raw:(raw&&Array.isArray(raw.entries)?raw.entries:[]);
@@ -1927,6 +1927,9 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.85', d:'2026-09-14', items:[
+    '修复坚果云首次同步报 HTTP 409：云端还没有 Copie 文件夹时，现在会自动新建并上传',
+  ]},
   {v:'1.84', d:'2026-09-14', items:[
     '云同步新增「同步渠道」：可选 GitHub（加密）或<b>坚果云</b>（明文 JSON，网盘里能直接看；仅 App 内可用）；「云同步」旁的 ? 按渠道显示对应教程',
     '壳 1.76：悬浮球「收集模式」——设置里打开后，双击球变 +，复制完点一下 + 就自动新建一条（标题为日期时间），再双击变回',
