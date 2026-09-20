@@ -527,6 +527,10 @@
             <span>自动识别复制<small style="display:block;color:var(--faint);font-size:11.5px">要在系统「无障碍」里打开「Copie 复制侦测」。开了之后，收集模式下一复制就在文字旁弹标签带，选一颗即收进；点别处取消</small></span>
             <button class="btn ghost" id="copyWatchBtn" style="flex:none;margin-left:10px">去开启</button>
           </div>
+          <div class="bubble-row" id="copyWatchKeepRow" style="display:none">
+            <span>被系统关掉后自动恢复<small style="display:block;color:var(--faint);font-size:11.5px" id="copyWatchKeepHint">国产系统把「划掉后台」当强制停止，会顺手关掉无障碍。手机连电脑用 adb 授一次权限，之后 App 每次启动会自己把它打开</small></span>
+            <button class="btn ghost" id="copyWatchKeepBtn" style="flex:none;margin-left:10px">复制 adb 命令</button>
+          </div>
           <div class="bubble-row" id="copyWatchLogRow" style="display:none">
             <span>复制侦测日志<small style="display:block;color:var(--faint);font-size:11.5px">某个 App 复制后不弹标签带？点这里把壳看到的点击事件复制出来，贴给 AI 排查</small></span>
             <button class="btn ghost" id="copyWatchLogBtn" style="flex:none;margin-left:10px">复制日志</button>
@@ -788,7 +792,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.89';
+const APP_VERSION='1.90';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -2106,6 +2110,11 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
     const btn=$('#copyWatchBtn'), upd=()=>{ const on=!!AndroidBridge.isCopyWatchOn(); btn.textContent=on?'已开启':'去开启'; btn.classList.toggle('primary',!on); btn.classList.toggle('ghost',on); };
     upd(); btn.onclick=()=>{ AndroidBridge.openCopyWatchSettings(); };
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) upd(); }); window.addEventListener('focus',upd);
+    if(AndroidBridge.canSelfEnableCopyWatch){ $('#copyWatchKeepRow').style.display='';
+      const kb=$('#copyWatchKeepBtn'), kh=$('#copyWatchKeepHint'), kupd=()=>{ const ok=!!AndroidBridge.canSelfEnableCopyWatch();
+        kb.textContent=ok?'已授权':'复制 adb 命令'; kb.disabled=ok; if(ok) kh.textContent='已拿到权限：被系统关掉后，下次打开 App 或悬浮球会自动重新开启'; };
+      kupd(); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) kupd(); });
+      kb.onclick=async()=>{ await copyText(AndroidBridge.copyWatchAdbCommand()); toast('已复制，电脑上连手机后在终端粘贴运行'); }; }
     if(AndroidBridge.copyWatchLog){ $('#copyWatchLogRow').style.display=''; $('#copyWatchLogBtn').onclick=()=>{ AndroidBridge.copyWatchLog(); toast('日志已复制，粘贴给 AI 即可'); }; } }
   if(AndroidBridge.isPanelInputOn){ $('#panelInputRow').style.display='';
     $('#panelInputToggle').checked=!!AndroidBridge.isPanelInputOn();
@@ -2163,6 +2172,14 @@ render();
 /* PWA：注册 Service Worker（仅在 http/https 下生效，file:// 本地打开会自动跳过） */
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  /* SW 后台拉到新版会发消息过来：没在操作就直接刷新（缓存已是新版，秒开）；正忙就记着，空下来再刷 */
+  const copieIdle=()=>{ if(document.hidden) return false; if(typeof openSwipe!=='undefined'&&openSwipe) return false; if(typeof selMode!=='undefined'&&selMode) return false;
+    const a=document.activeElement; if(a&&a.closest&&a.closest('input,textarea,[contenteditable="true"]')) return false;
+    return !document.querySelector('#bloomMask.show,#addNameMask.show,#removeNameMask.show,#saveFilterMask.show,#tagMask.show,#editMask.show,#snapMask.show,#logMask.show,#importHelpMask.show,#helpMask.show,#filterPop.show,#sortPop.show,#settingsPage.show'); };
+  let pendingReload=false;
+  navigator.serviceWorker.addEventListener('message',e=>{ if(!e.data||e.data.type!=='copie-updated') return;
+    if(copieIdle()) location.reload(); else { pendingReload=true; toast('新版本已就绪，空下来自动刷新'); } });
+  setInterval(()=>{ if(pendingReload&&copieIdle()){ pendingReload=false; location.reload(); } },4000);
 }
 </script>
 </body>
