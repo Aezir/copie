@@ -520,19 +520,26 @@
             <label class="switch"><input type="checkbox" id="panelInputToggle"><span class="track"></span></label>
           </div>
           <div class="bubble-row" id="collectRow" style="display:none">
-            <span>双击进入收集模式<small style="display:block;color:var(--faint);font-size:11.5px">双击球变「+」；之后在任何 App 里一复制，约 1 秒后标签带自动弹出，选一颗就收进，点别处取消（不用任何权限）。键盘开着时不会自动弹，按住球不动半秒可手动弹。再双击变回；开着时单击会稍等一下再打开面板</small></span>
+            <span>双击进入收集模式<small style="display:block;color:var(--faint);font-size:11.5px">双击球变「+」；之后在任何 App 里一复制，标签带自动弹出，选一颗就收进，点别处取消。按住球不动半秒可手动弹。再双击变回；开着时单击会稍等一下再打开面板</small></span>
             <label class="switch"><input type="checkbox" id="collectToggle"><span class="track"></span></label>
           </div>
-          <div class="bubble-row" id="processTextRow" style="display:none">
-            <span>顺手的捷径：选中菜单里的「Copie」<small style="display:block;color:var(--faint);font-size:11.5px">用系统选中工具条的 App 里（浏览器、微信聊天等），选中文字后菜单里多一项 Copie，点它等于「复制 + 点球」一步到位。不用任何权限</small></span>
+          <div class="bubble-row" id="captureRow" style="display:none">
+            <span>取复制方案<small style="display:block;color:var(--faint);font-size:11.5px">零权限：不用任何权限，靠触摸节奏判断何时看剪贴板，仍在调教。无障碍：最准、贴着文字弹，但要在系统里打开并保后台，划掉后台会被关</small></span>
+            <div class="seg-pill" id="captureSeg" style="margin-left:10px"><button data-capture="peek">零权限</button><button data-capture="a11y">无障碍</button></div>
           </div>
-          <div class="bubble-row" id="copyWatchRow" style="display:none">
-            <span>贴着文字弹（可选，需无障碍）<small style="display:block;color:var(--faint);font-size:11.5px">默认标签带弹在屏幕正中。想让它贴着你复制的那段文字弹，在系统「无障碍」里打开「Copie 复制侦测」。部分手机划掉后台会把它关掉，需重开</small></span>
-            <button class="btn ghost" id="copyWatchBtn" style="flex:none;margin-left:10px">去开启</button>
+          <div id="peekOpts" style="display:none">
+            <div class="bubble-row"><span>反应速度<small style="display:block;color:var(--faint);font-size:11.5px">复制后多久弹出。越快越可能打断拖动选区把手；再快也不会低于系统长按阈值</small></span><span class="size-val" id="peekVal">0.8s</span></div>
+            <input type="range" id="peekRange" class="size-range" min="500" max="2000" step="100" value="800">
           </div>
-          <div class="bubble-row" id="copyWatchKeepRow" style="display:none">
-            <span>别让系统杀掉<small style="display:block;color:var(--faint);font-size:11.5px">国产系统把「划掉后台」当强制停止，会顺手关掉无障碍。三件事：在最近任务里把 Copie 锁定；放开「自启动」；电池改成「不限制」</small></span>
-            <span style="flex:none;margin-left:10px;display:flex;gap:6px"><button class="btn ghost" id="autoStartBtn">自启动</button><button class="btn ghost" id="batteryBtn">电池</button></span>
+          <div id="a11yOpts" style="display:none">
+            <div class="bubble-row">
+              <span>Copie 复制侦测<small style="display:block;color:var(--faint);font-size:11.5px">在系统「无障碍」里打开。收集模式下一复制就贴着那段文字弹标签带</small></span>
+              <button class="btn ghost" id="copyWatchBtn" style="flex:none;margin-left:10px">去开启</button>
+            </div>
+            <div class="bubble-row">
+              <span>保后台<small style="display:block;color:var(--faint);font-size:11.5px">国产系统把「划掉后台」当强制停止，会顺手关掉无障碍。三件事：最近任务里锁定 Copie；放开自启动；电池改成不限制</small></span>
+              <span style="flex:none;margin-left:10px;display:flex;gap:6px"><button class="btn ghost" id="autoStartBtn">自启动</button><button class="btn ghost" id="batteryBtn">电池</button></span>
+            </div>
           </div>
           <div class="bubble-row" id="copyWatchLogRow" style="display:none">
             <span>复制侦测日志<small style="display:block;color:var(--faint);font-size:11.5px">某个 App 复制后不弹标签带？点这里把壳看到的点击事件复制出来，贴给 AI 排查</small></span>
@@ -795,7 +802,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.97';
+const APP_VERSION='1.98';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -2110,7 +2117,24 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   if(AndroidBridge.setCollect){ $('#collectRow').style.display='';
     $('#collectToggle').checked=!!AndroidBridge.isCollectOn();
     $('#collectToggle').onchange=e=>AndroidBridge.setCollect(!!e.target.checked); }
-  /* 无障碍 / 保活 / 侦测日志 / 选中菜单 这些行已退居幕后，不再显示（桥方法都还在）。暗门：长按「双击进入收集模式」那行文字复制侦测日志 */
+  /* 取复制方案：像日/夜间一样二选一；选零权限露出反应速度，选无障碍露出开关状态和保后台按钮 */
+  if(AndroidBridge.getCaptureMode){ $('#captureRow').style.display='';
+    const seg=$('#captureSeg'), setUI=m=>{ seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.capture===m));
+      $('#peekOpts').style.display=m==='peek'?'':'none'; $('#a11yOpts').style.display=m==='a11y'?'':'none'; };
+    let mode='peek'; try{ mode=AndroidBridge.getCaptureMode()||'peek'; }catch(_){} setUI(mode);
+    seg.addEventListener('click',e=>{ const b=e.target.closest('[data-capture]'); if(!b) return; mode=b.dataset.capture; AndroidBridge.setCaptureMode(mode); setUI(mode);
+      if(mode==='a11y'){ try{ if(!AndroidBridge.isCopyWatchOn()) toast('去系统无障碍里打开「Copie 复制侦测」'); }catch(_){} } });
+    const pr=$('#peekRange'), pv=$('#peekVal'), fmt=v=>(v/1000).toFixed(1)+'s';
+    try{ pr.value=AndroidBridge.getPeekDelay(); }catch(_){} pv.textContent=fmt(pr.value);
+    pr.oninput=ev=>{ pv.textContent=fmt(ev.target.value); }; pr.onchange=ev=>{ AndroidBridge.setPeekDelay(parseInt(ev.target.value,10)); };
+    const btn=$('#copyWatchBtn'), upd=()=>{ try{ const on=!!AndroidBridge.isCopyWatchOn(); let st='off'; try{ st=AndroidBridge.copyWatchState?AndroidBridge.copyWatchState():(on?'running':'off'); }catch(_){}
+      btn.textContent=on?'已开启':(st==='lost'?'被系统关了，重开':'去开启'); btn.classList.toggle('primary',!on); btn.classList.toggle('ghost',on); }catch(_){} };
+    upd(); btn.onclick=()=>AndroidBridge.openCopyWatchSettings();
+    const bb=$('#batteryBtn'), bupd=()=>{ try{ bb.textContent=AndroidBridge.isBatteryUnrestricted()?'电池已放开':'电池'; }catch(_){} }; bupd();
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ upd(); bupd(); } }); window.addEventListener('focus',()=>{ upd(); bupd(); });
+    $('#autoStartBtn').onclick=()=>{ AndroidBridge.openAutoStart(); toast('找到 Copie，允许自启动 / 后台运行'); };
+    bb.onclick=()=>AndroidBridge.openBattery(); }
+  /* 侦测日志暗门：长按「双击进入收集模式」那行文字 */
   if(AndroidBridge.copyWatchLog){ const lab=$('#collectRow span'); let lt=0;
     lab.addEventListener('touchstart',()=>{ lt=setTimeout(()=>{ AndroidBridge.copyWatchLog(); toast('侦测日志已复制'); },800); },{passive:true});
     ['touchend','touchmove','touchcancel'].forEach(ev=>lab.addEventListener(ev,()=>clearTimeout(lt),{passive:true})); }
