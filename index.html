@@ -795,7 +795,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.94';
+const APP_VERSION='1.95';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -2101,7 +2101,8 @@ function orderedTags(){ const u=tagUse(), all=allTags(); let last=null, lastAt=0
   for(const t of all){ const r=u[t]; if(r&&r.at>lastAt){ lastAt=r.at; last=t; } }
   const rest=all.filter(t=>t!==last).sort((a,b)=>((u[b]||{}).n||0)-((u[a]||{}).n||0) || a.localeCompare(b,'zh'));
   return last?[last,...rest]:rest; }
-window.copieTags=function(){ refreshFromDB(); return JSON.stringify(orderedTags()); };
+let entriesLoaded=false;
+window.copieTags=function(){ if(!entriesLoaded) return '__loading__'; refreshFromDB(); return JSON.stringify(orderedTags()); };
 try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   $('#bubbleSec').style.display='';
   $('#bubbleToggle').checked=!!AndroidBridge.isBubbleOn();
@@ -2167,7 +2168,7 @@ render();
   try{ for(const r of rawAll){ const legacyBlocks=Array.isArray(r.blocks)&&r.blocks.some(b=>typeof b==='string'||!b||typeof b!=='object'||!('key' in b)||!('value' in b));
     if((r.fields&&!r.blocks) || legacyBlocks || r.fav===undefined || r.pinned===undefined){ await put(findEnt(r.id)); } } }
   finally{ applyingRemote=false; }
-  render(); dbReadyRes();
+  render(); entriesLoaded=true; dbReadyRes();
   if(pendingShare){ openEdit(null); $('#fTitle').value=pendingShare.title;
     $('#blocksWrap').innerHTML=''; addBlkRow(pendingShare.text); pendingShare=null; }
   snapshotDaily(); // 每天首次打开留一份本机快照
