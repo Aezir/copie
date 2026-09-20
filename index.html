@@ -520,16 +520,19 @@
             <label class="switch"><input type="checkbox" id="panelInputToggle"><span class="track"></span></label>
           </div>
           <div class="bubble-row" id="collectRow" style="display:none">
-            <span>双击进入收集模式<small style="display:block;color:var(--faint);font-size:11.5px">双击球变「+」，复制完点一下 + 就收进 Copie，再双击变回；开着时单击会稍等一下再打开面板</small></span>
+            <span>双击进入收集模式<small style="display:block;color:var(--faint);font-size:11.5px">双击球变「+」；之后在任何 App 里一复制，标签带自动弹出，选一颗就收进，点别处取消（不用任何权限）。没弹出来就点一下 +。再双击变回；开着时单击会稍等一下再打开面板</small></span>
             <label class="switch"><input type="checkbox" id="collectToggle"><span class="track"></span></label>
           </div>
+          <div class="bubble-row" id="processTextRow" style="display:none">
+            <span>顺手的捷径：选中菜单里的「Copie」<small style="display:block;color:var(--faint);font-size:11.5px">用系统选中工具条的 App 里（浏览器、微信聊天等），选中文字后菜单里多一项 Copie，点它等于「复制 + 点球」一步到位。不用任何权限</small></span>
+          </div>
           <div class="bubble-row" id="copyWatchRow" style="display:none">
-            <span>自动识别复制<small style="display:block;color:var(--faint);font-size:11.5px">要在系统「无障碍」里打开「Copie 复制侦测」。开了之后，收集模式下一复制就在文字旁弹标签带，选一颗即收进；点别处取消</small></span>
+            <span>贴着文字弹（可选，需无障碍）<small style="display:block;color:var(--faint);font-size:11.5px">默认标签带弹在屏幕正中。想让它贴着你复制的那段文字弹，在系统「无障碍」里打开「Copie 复制侦测」。部分手机划掉后台会把它关掉，需重开</small></span>
             <button class="btn ghost" id="copyWatchBtn" style="flex:none;margin-left:10px">去开启</button>
           </div>
           <div class="bubble-row" id="copyWatchKeepRow" style="display:none">
-            <span>被系统关掉后自动恢复<small style="display:block;color:var(--faint);font-size:11.5px" id="copyWatchKeepHint">国产系统把「划掉后台」当强制停止，会顺手关掉无障碍。手机连电脑用 adb 授一次权限，之后 App 每次启动会自己把它打开</small></span>
-            <button class="btn ghost" id="copyWatchKeepBtn" style="flex:none;margin-left:10px">复制 adb 命令</button>
+            <span>别让系统杀掉<small style="display:block;color:var(--faint);font-size:11.5px">国产系统把「划掉后台」当强制停止，会顺手关掉无障碍。三件事：在最近任务里把 Copie 锁定；放开「自启动」；电池改成「不限制」</small></span>
+            <span style="flex:none;margin-left:10px;display:flex;gap:6px"><button class="btn ghost" id="autoStartBtn">自启动</button><button class="btn ghost" id="batteryBtn">电池</button></span>
           </div>
           <div class="bubble-row" id="copyWatchLogRow" style="display:none">
             <span>复制侦测日志<small style="display:block;color:var(--faint);font-size:11.5px">某个 App 复制后不弹标签带？点这里把壳看到的点击事件复制出来，贴给 AI 排查</small></span>
@@ -792,7 +795,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.90';
+const APP_VERSION='1.93';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -2106,15 +2109,17 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
   if(AndroidBridge.setCollect){ $('#collectRow').style.display='';
     $('#collectToggle').checked=!!AndroidBridge.isCollectOn();
     $('#collectToggle').onchange=e=>AndroidBridge.setCollect(!!e.target.checked); }
+  if(AndroidBridge.openAutoStart) $('#processTextRow').style.display=''; // 壳 1.83+ 才有选中菜单入口
   if(AndroidBridge.isCopyWatchOn){ $('#copyWatchRow').style.display='';
-    const btn=$('#copyWatchBtn'), upd=()=>{ const on=!!AndroidBridge.isCopyWatchOn(); btn.textContent=on?'已开启':'去开启'; btn.classList.toggle('primary',!on); btn.classList.toggle('ghost',on); };
+    const btn=$('#copyWatchBtn'), upd=()=>{ const on=!!AndroidBridge.isCopyWatchOn(); let st='off'; try{ st=AndroidBridge.copyWatchState?AndroidBridge.copyWatchState():(on?'running':'off'); }catch(_){}
+      btn.textContent=on?'已开启':(st==='lost'?'被系统关了，重开':'去开启'); btn.classList.toggle('primary',!on); btn.classList.toggle('ghost',on); };
     upd(); btn.onclick=()=>{ AndroidBridge.openCopyWatchSettings(); };
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) upd(); }); window.addEventListener('focus',upd);
-    if(AndroidBridge.canSelfEnableCopyWatch){ $('#copyWatchKeepRow').style.display='';
-      const kb=$('#copyWatchKeepBtn'), kh=$('#copyWatchKeepHint'), kupd=()=>{ const ok=!!AndroidBridge.canSelfEnableCopyWatch();
-        kb.textContent=ok?'已授权':'复制 adb 命令'; kb.disabled=ok; if(ok) kh.textContent='已拿到权限：被系统关掉后，下次打开 App 或悬浮球会自动重新开启'; };
-      kupd(); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) kupd(); });
-      kb.onclick=async()=>{ await copyText(AndroidBridge.copyWatchAdbCommand()); toast('已复制，电脑上连手机后在终端粘贴运行'); }; }
+    if(AndroidBridge.openAutoStart){ $('#copyWatchKeepRow').style.display='';
+      const bb=$('#batteryBtn'), bupd=()=>{ try{ const ok=!!AndroidBridge.isBatteryUnrestricted(); bb.textContent=ok?'电池已放开':'电池'; }catch(_){} };
+      bupd(); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) bupd(); });
+      $('#autoStartBtn').onclick=()=>{ AndroidBridge.openAutoStart(); toast('找到 Copie，允许自启动 / 后台运行'); };
+      bb.onclick=()=>AndroidBridge.openBattery(); }
     if(AndroidBridge.copyWatchLog){ $('#copyWatchLogRow').style.display=''; $('#copyWatchLogBtn').onclick=()=>{ AndroidBridge.copyWatchLog(); toast('日志已复制，粘贴给 AI 即可'); }; } }
   if(AndroidBridge.isPanelInputOn){ $('#panelInputRow').style.display='';
     $('#panelInputToggle').checked=!!AndroidBridge.isPanelInputOn();
