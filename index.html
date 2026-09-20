@@ -784,7 +784,7 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.86';
+const APP_VERSION='1.87';
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -2011,6 +2011,10 @@ function openChangelog(){ $('#logBody').innerHTML=CHANGELOG.map(c=>`<h4>${/^d/.t
 $('#changelogBtn').onclick=openChangelog;
 $('#logClose').onclick=()=>$('#logMask').classList.remove('show');
 $('#logMask').addEventListener('click',e=>{ if(e.target.id==='logMask') e.currentTarget.classList.remove('show'); });
+
+/* 壳里 WebView 不处理 target=_blank 也不会下载 APK：外链一律交给原生桥用系统浏览器打开（老壳没有这个桥就走默认） */
+document.addEventListener('click',e=>{ const a=e.target.closest('a[target="_blank"]'); if(!a||!a.href) return;
+  try{ if(window.AndroidBridge&&AndroidBridge.openUrl){ e.preventDefault(); AndroidBridge.openUrl(a.href); } }catch(_){} }, true);
 
 /* ---------- 检查更新 ---------- */
 function cmpVer(a,b){ const pa=String(a||'0').split('.').map(x=>parseInt(x,10)||0), pb=String(b||'0').split('.').map(x=>parseInt(x,10)||0);
