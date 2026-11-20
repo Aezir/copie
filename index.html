@@ -160,6 +160,7 @@
   .cell:focus{box-shadow:0 0 0 2px var(--accent); padding:2px 4px; margin:-2px -4px;}
   .block-text{font-size:14px; line-height:1.55; color:var(--text); white-space:pre-wrap; word-break:break-all; max-height:160px; overflow-y:auto; overscroll-behavior:contain; min-height:22px; padding-top:1px;}
   .row-actions{flex:none; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .note-link{color:var(--accent); text-decoration:underline; cursor:pointer;}
   .block-text:empty::before{content:'点击输入'; color:var(--faint);}
   .block-text.expanded, .block-text:focus{max-height:none; overflow:visible;}
   .rowcopy{flex:none; display:flex; align-items:center; gap:3px; height:26px; padding:0 6px; border:none; border-radius:6px; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; opacity:.5; transition:opacity .12s, background .12s, color .12s; font-family:inherit;}
@@ -473,13 +474,6 @@
         </div>
       </div>
 
-      <div class="sec-label" style="display:flex;align-items:center;gap:2px">数据<button class="help-btn" id="importHelp" aria-label="导入格式说明"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
-      <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
-      <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入文件<small>选一个 JSON 文件恢复，合并不覆盖</small></div></div>
-      <div class="menu-item" id="importClipItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">从剪贴板导入<small>直接粘贴 JSON 文本导入</small></div></div>
-      <div class="menu-item" id="snapItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12H4C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C9.25022 4 6.82447 5.38734 5.38451 7.50024L8 7.5V9.5H2V3.5H4L3.99989 5.99918C5.82434 3.57075 8.72873 2 12 2ZM13 7L12.9998 11.585L16.2426 14.8284L14.8284 16.2426L10.9998 12.413L11 7H13Z"/></svg><div class="mt">本地快照<small>每天首次打开、每次同步前自动留底，可一键恢复</small></div></div>
-      <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
-
       <div class="sec-label sync-hd">云同步<button class="help-btn" id="syncHelp" aria-label="教程"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
       <div class="set-card">
         <div class="set-row">
@@ -507,6 +501,13 @@
         </div>
         <div class="sync-note" id="syncNote"></div>
       </div>
+
+      <div class="sec-label" style="display:flex;align-items:center;gap:2px">数据<button class="help-btn" id="importHelp" aria-label="导入格式说明"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15V17H13V15H11ZM13 13.3551C14.4457 12.9248 15.5 11.5855 15.5 10C15.5 8.067 13.933 6.5 12 6.5C10.302 6.5 8.88637 7.70919 8.56731 9.31346L10.5288 9.70577C10.6656 9.01823 11.2723 8.5 12 8.5C12.8284 8.5 13.5 9.17157 13.5 10C13.5 10.8284 12.8284 11.5 12 11.5C11.4477 11.5 11 11.9477 11 12.5V14H13V13.3551Z"/></svg></button></div>
+      <div class="menu-item" id="exportItem"><svg class="ic" viewBox="0 0 24 24"><path d="M13 10H18L12 16L6 10H11V3H13V10ZM4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19Z"/></svg><div class="mt">导出全部<small>存成 JSON 文件，备份或换设备</small></div></div>
+      <div class="menu-item" id="importItem"><svg class="ic" viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg><div class="mt">导入文件<small>选一个 JSON 文件恢复，合并不覆盖</small></div></div>
+      <div class="menu-item" id="importClipItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">从剪贴板导入<small>直接粘贴 JSON 文本导入</small></div></div>
+      <div class="menu-item" id="snapItem"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12H4C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C9.25022 4 6.82447 5.38734 5.38451 7.50024L8 7.5V9.5H2V3.5H4L3.99989 5.99918C5.82434 3.57075 8.72873 2 12 2ZM13 7L12.9998 11.585L16.2426 14.8284L14.8284 16.2426L10.9998 12.413L11 7H13Z"/></svg><div class="mt">本地快照<small>每天首次打开、每次同步前自动留底，可一键恢复</small></div></div>
+      <div class="menu-item" id="copyAllItem"><svg class="ic" viewBox="0 0 24 24"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"/></svg><div class="mt">复制全部到剪贴板<small>直接粘贴到别处</small></div></div>
 
       <div id="bubbleSec" style="display:none">
         <div class="sec-label">悬浮球（仅 App 内）</div>
@@ -552,6 +553,7 @@
 
       <div class="sec-label">显示</div>
       <div class="bubble-card">
+        <label class="bubble-row"><span>使用系统默认浏览器打开跳转链接</span><span class="switch"><input type="checkbox" id="openLinksToggle"><span class="track"></span></span></label>
         <div class="bubble-row"><span>代码高亮</span><label class="switch"><input type="checkbox" id="hlToggle"><span class="track"></span></label></div>
         <div class="bubble-row"><span>隐私模式（子条目打码，只留首尾4字）</span><label class="switch"><input type="checkbox" id="privToggle"><span class="track"></span></label></div>
       </div>
@@ -1027,7 +1029,8 @@ function loadMeta(){ try{ return Object.assign({date:true,time:false,words:false
 function saveMeta(m){ localStorage.setItem(META_KEY, JSON.stringify(m)); }
 function loadHl(){ try{ const v=localStorage.getItem(HL_KEY); return v===null?true:v==='1'; }catch(_){ return true; } }
 function saveHl(v){ localStorage.setItem(HL_KEY, v?'1':'0'); }
-const PRIV_KEY='copie.privacy';
+const PRIV_KEY='copie.privacy', OPEN_LINKS_KEY='copie.openLinksInBrowser';
+function loadOpenLinks(){ try{ return localStorage.getItem(OPEN_LINKS_KEY)==='1'; }catch(_){ return false; } }
 function loadPrivacy(){ try{ return localStorage.getItem(PRIV_KEY)==='1'; }catch(_){ return false; } }
 function savePrivacy(v){ localStorage.setItem(PRIV_KEY, v?'1':'0'); }
 function maskText(s){ const a=Array.from(String(s)); if(a.length<=8) return s; return a.slice(0,4).join('')+'••••'+a.slice(-4).join(''); }
@@ -1048,6 +1051,30 @@ function hlCode(src){ const e=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;',
     for(const p of pat){ const mm=rest.match(p[1]); if(mm){ hit=mm[0]; cls=p[0]; break; } }
     if(hit){ out+=`<span class="tk-${cls}">${e(hit)}</span>`; i+=hit.length; } else { out+=e(src[i]); i++; } }
   return out; }
+function noteTextHTML(text, openLinks, highlight=false){
+  const format = highlight ? hlCode : esc;
+  if(!openLinks) return format(text);
+  const urls = /\b(?:https?:\/\/|www\.)[^\s<>"'`，。！？；：、“”‘’（）【】《》]+/gi;
+  let result='', end=0;
+  for(const match of text.matchAll(urls)){
+    let label=match[0].replace(/[.,!?;:]+$/, '');
+    // 句末的闭括号可能属于正文。保留网址里配对的括号（如百科词条）。
+    for(const [open,close] of [['(',')'],['[',']'],['{','}']]){
+      const excess=label.split(close).length-label.split(open).length;
+      for(let i=0; i<excess && label.endsWith(close); i++) label=label.slice(0,-1);
+    }
+    let url;
+    try{ url=new URL(/^www\./i.test(label)?'https://'+label:label); }catch(_){ continue; }
+    if(url.protocol!=='https:' && url.protocol!=='http:') continue;
+    result+=format(text.slice(end,match.index));
+    result+=`<a class="note-link" contenteditable="false" href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
+    end=match.index+label.length;
+  }
+  return result+format(text.slice(end));
+}
+function blockBodyHTML(value, privacy, highlight, openLinks){
+  return privacy ? esc(maskText(value)) : noteTextHTML(value,openLinks,highlight);
+}
 function initCodeWrap(cw){ const ta=cw.querySelector('.blk-value'), pre=cw.querySelector('.code-hl'), code=pre.querySelector('code');
   cw.classList.toggle('hl', loadHl());
   const upd=()=>{ if(cw.classList.contains('hl')) code.innerHTML=hlCode(ta.value)+'\n'; };
@@ -1059,6 +1086,9 @@ function buildDisplayUI(){ const m=loadMeta();
   set('metaDate',m.date); set('metaTime',m.time); set('metaWords',m.words); set('metaTokens',m.tokens); set('hlToggle',loadHl()); set('privToggle',loadPrivacy());
   const bindMeta=(id,key)=>{ const el=$('#'+id); if(el) el.onchange=ev=>{ const mm=loadMeta(); mm[key]=ev.target.checked; saveMeta(mm); render(); }; };
   bindMeta('metaDate','date'); bindMeta('metaTime','time'); bindMeta('metaWords','words'); bindMeta('metaTokens','tokens');
+  const openLinks=$('#openLinksToggle');
+  openLinks.checked=loadOpenLinks();
+  openLinks.onchange=()=>{ localStorage.setItem(OPEN_LINKS_KEY,openLinks.checked?'1':'0'); render(); };
   const hl=$('#hlToggle'); if(hl) hl.onchange=ev=>{ saveHl(ev.target.checked); applyHl(); };
   const pv=$('#privToggle'); if(pv) pv.onchange=ev=>{ savePrivacy(ev.target.checked); render();
     try{ window.AndroidBridge&&AndroidBridge.setPrivacy&&AndroidBridge.setPrivacy(ev.target.checked); }catch(_){} }; }
@@ -1078,7 +1108,7 @@ function render(){
   else data.sort((a,b)=>direction*((a.updatedAt||0)-(b.updatedAt||0)));
   data.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)); // 置顶的排最前（稳定排序保留原顺序）
 
-  lastRendered=data.map(e=>e.id); openSwipe=null; const HLon=loadHl(), PRIV=loadPrivacy();
+  lastRendered=data.map(e=>e.id); openSwipe=null; const HLon=loadHl(), PRIV=loadPrivacy(), openLinks=loadOpenLinks();
   if(!data.length){ list.innerHTML=`<div class="empty">${(kw||selectedTags.size)?'没找到匹配的记录':'还没有记录<br>点右上角 + 添加第一条'}</div>`; refreshExpandIcon(); return; }
   list.innerHTML=data.map((e,di)=>{
     const keyWidth=Math.max(0,...(e.blocks||[]).map(b=>Array.from(blockKey(b)).length));
@@ -1086,7 +1116,7 @@ function render(){
       const key=blockKey(b), value=blockValue(b);
       const exp=value.length>160?`<button class="rowcopy" data-expand="${e.id}_${i}" title="展开">${ic('expand')}</button>`:'';
       return `<div class="blk${key?' has-key':''}"><div class="swipe-actions"><button class="sw-act sw-name${key?' remove-name':''}" data-nameblock data-eid="${e.id}" data-bi="${i}" title="${key?'删除名称':'添加名称'}">${ic('tag')}</button><button class="sw-act sw-del" data-delblock data-eid="${e.id}" data-bi="${i}" title="删除此块">${ic('del')}</button></div><div class="row">
-        ${key?`<div class="block-key" contenteditable="true" spellcheck="false" style="--block-key-width:${keyWidth}em" data-eid="${e.id}" data-bi="${i}" data-k="block-key">${esc(key)}</div>`:''}<div class="cell block-text${PRIV?' priv':(HLon?' hl':'')}" contenteditable="true" id="b_${e.id}_${i}" data-eid="${e.id}" data-bi="${i}" data-k="block">${PRIV?esc(maskText(value)):(HLon?hlCode(value):esc(value))}</div>
+        ${key?`<div class="block-key" contenteditable="true" spellcheck="false" style="--block-key-width:${keyWidth}em" data-eid="${e.id}" data-bi="${i}" data-k="block-key">${noteTextHTML(key,openLinks)}</div>`:''}<div class="cell block-text${PRIV?' priv':(HLon?' hl':'')}" contenteditable="true" id="b_${e.id}_${i}" data-eid="${e.id}" data-bi="${i}" data-k="block">${blockBodyHTML(value,PRIV,HLon,openLinks)}</div>
         <div class="row-actions"><button class="rowcopy" data-copy-el="b_${e.id}_${i}" title="复制">${ic('copy')}</button>${exp}</div>
       </div></div>`;
     }).join('');
@@ -1105,7 +1135,7 @@ function render(){
         <div class="item-head" data-toggle="${e.id}">
           <span class="chk${sel?' on':''}">${ic(sel?'checkOn':'checkOff')}</span>
           <span class="tri">${ic('chevron')}</span>
-          <div class="head-main">${marks}<div class="item-title">${esc(e.title||'未命名')}</div>${metaChips(e)}${tags}</div>
+          <div class="head-main">${marks}<div class="item-title">${noteTextHTML(e.title||'未命名',openLinks)}</div>${metaChips(e)}${tags}</div>
           <span class="item-count">${(e.blocks||[]).length}</span>
         </div>
         <div class="item-body">
@@ -1231,8 +1261,13 @@ $('#removeNameConfirm').onclick=async()=>{ const pending=pendingNameRemoval; if(
   pendingNameRemoval=null; $('#removeNameMask').classList.remove('show'); await removeBlockName(pending.id,pending.bi);
 };
 /* ---------- 点击 ---------- */
+$('#list').addEventListener('pointerdown',e=>{
+  // 避免先聚焦父级可编辑区，导致链接在 click 到达之前被替换成纯文本。
+  if(e.button===0 && e.target.closest('a.note-link')) e.preventDefault();
+});
 $('#list').addEventListener('click',async e=>{
   const t=e.target;
+  const link=t.closest('a.note-link');
   const pinBtn=t.closest('[data-pin]');
   if(pinBtn){ const ent=findEnt(pinBtn.dataset.pin); ent.pinned=!ent.pinned; await put(ent); closeSwipe(); render(); toast(ent.pinned?'已置顶':'已取消置顶'); return; }
   const favBtn=t.closest('[data-fav]');
@@ -1243,11 +1278,25 @@ $('#list').addEventListener('click',async e=>{
       showUndoBar(`已删除「${restore.title||'未命名'}」`, async()=>{ await put(restore); if(!findEnt(restore.id)) entries.push(restore); }); }
     return; }
   const w=t.closest('.item-wrap');
-  if(w && w.classList.contains('open') && !t.closest('.swipe-actions')){ w.classList.remove('open'); openSwipe=null; return; }
+  if(w && w.classList.contains('open') && !t.closest('.swipe-actions')){
+    if(link) e.preventDefault();
+    w.classList.remove('open'); openSwipe=null; return;
+  }
 
-  if(selMode){ const head=t.closest('[data-toggle]');
+  if(selMode){ if(link) e.preventDefault(); const head=t.closest('[data-toggle]');
     if(head){ const id=head.dataset.toggle; selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id); updateBatch(); render(); } return; }
 
+  if(link){
+    const bridge=window.AndroidBridge;
+    if(bridge && bridge.openInDefaultBrowser){
+      e.preventDefault();
+      bridge.openInDefaultBrowser(link.href);
+    } else if(bridge && bridge.openUrl){
+      e.preventDefault();
+      bridge.openUrl(link.href);
+    }
+    return;
+  }
   if(t.closest('[contenteditable="true"]')) return;
   const titleEl=t.closest('.item-title');
   if(titleEl){ const w=t.closest('.item-wrap'); if(w){ closeSwipe(); openEdit(w.dataset.id); return; } }
@@ -1282,7 +1331,7 @@ $('#list').addEventListener('click',async e=>{
 $('#list').addEventListener('focusin',e=>{ const el=e.target; if(!el.dataset||(el.dataset.k!=='block'&&el.dataset.k!=='block-key')) return;
   const ent=findEnt(el.dataset.eid); if(!ent) return; const bi=+el.dataset.bi;
   if(el.dataset.k==='block-key'&&ent.blocks[bi]!==undefined) el.textContent=blockKey(ent.blocks[bi]);
-  else if((el.classList.contains('hl')||el.classList.contains('priv'))&&ent.blocks[bi]!==undefined) el.textContent=blockValue(ent.blocks[bi]); }); // 聚焦显真·纯文本，中文输入法安全
+  else if((el.classList.contains('hl')||el.classList.contains('priv')||el.querySelector('.note-link'))&&ent.blocks[bi]!==undefined) el.textContent=blockValue(ent.blocks[bi]); }); // 聚焦显真·纯文本，中文输入法安全
 $('#list').addEventListener('focusout',async e=>{
   const el=e.target; if(!el.dataset||(el.dataset.k!=='block'&&el.dataset.k!=='block-key')) return;
   const ent=findEnt(el.dataset.eid); if(!ent) return;
@@ -1292,8 +1341,7 @@ $('#list').addEventListener('focusout',async e=>{
     : {key:blockKey(before),value:el.innerText.replace(/\n$/,'')};
   await put(ent);
   if(el.dataset.k==='block-key'){ render(); return; }
-  if(el.classList.contains('priv')) el.innerHTML=esc(maskText(blockValue(ent.blocks[bi]))); // 失焦重新打码
-  else if(el.classList.contains('hl')) el.innerHTML=hlCode(blockValue(ent.blocks[bi])); // 失焦重新着色
+  el.innerHTML=blockBodyHTML(blockValue(ent.blocks[bi]),el.classList.contains('priv'),el.classList.contains('hl'),loadOpenLinks());
 });
 $('#list').addEventListener('keydown',e=>{ if(e.key==='Escape'&&e.target.dataset&&e.target.dataset.k==='block'){ e.target.blur(); } });
 /* 点空白区域即退出子条目编辑（contenteditable 不会自动失焦） */
@@ -2037,7 +2085,7 @@ $('#logClose').onclick=()=>$('#logMask').classList.remove('show');
 $('#logMask').addEventListener('click',e=>{ if(e.target.id==='logMask') e.currentTarget.classList.remove('show'); });
 
 /* 壳里 WebView 不处理 target=_blank 也不会下载 APK：外链一律交给原生桥用系统浏览器打开（老壳没有这个桥就走默认） */
-document.addEventListener('click',e=>{ const a=e.target.closest('a[target="_blank"]'); if(!a||!a.href) return;
+document.addEventListener('click',e=>{ const a=e.target.closest('a[target="_blank"]:not(.note-link)'); if(!a||!a.href) return;
   try{ if(window.AndroidBridge&&AndroidBridge.openUrl){ e.preventDefault(); AndroidBridge.openUrl(a.href); } }catch(_){} }, true);
 
 /* ---------- 检查更新 ---------- */
@@ -2165,7 +2213,7 @@ try{ if(window.AndroidBridge&&AndroidBridge.setBubble){
 /* ---------- 悬浮面板打字：输入框获焦时让壳把窗口切成可获焦并弹键盘，失焦后还回去（壳里非面板那份网页调了也无效） ----------
    失焦→获焦之间隔一拍再判断，输入框之间切换不会让键盘闪一下 */
 try{ if(window.AndroidBridge&&AndroidBridge.wantInput){
-  const editable=el=>!!(el&&el.closest&&el.closest('input,textarea,[contenteditable="true"]'));
+  const editable=el=>!!el?.closest?.('input,textarea,[contenteditable]')?.matches('input,textarea,[contenteditable="true"]');
   let offTimer=0;
   document.addEventListener('focusin',e=>{ if(!editable(e.target)) return; clearTimeout(offTimer); try{ AndroidBridge.wantInput(true); }catch(_){} });
   document.addEventListener('focusout',e=>{ if(!editable(e.target)) return; clearTimeout(offTimer);
