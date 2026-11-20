@@ -224,7 +224,7 @@ hr{border:none;border-top:1px solid var(--divider);margin:24px 0;}
 
 <hr>
 
-<a class="dl-card" id="dlCard" href="https://copwe.netlify.app/copie-1.6.apk">
+<a class="dl-card" id="dlCard" href="https://github.com/Aezir/copie/releases/download/v1.90/copie-1.90.apk">
   <div class="dl-icon">
     <svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg>
   </div>
@@ -237,7 +237,7 @@ hr{border:none;border-top:1px solid var(--divider);margin:24px 0;}
 
 <script>
 (function(){
-  fetch('https://copwe.netlify.app/version.json?t='+Date.now())
+  fetch('version.json?t='+Date.now())
     .then(r=>r.json())
     .then(function(d){
       var card=document.getElementById('dlCard');
@@ -285,17 +285,17 @@ hr{border:none;border-top:1px solid var(--divider);margin:24px 0;}
   </div>
 </div>
 
-<!-- 11. 自动更新检测 -->
+<!-- 11. 检查软件更新 -->
 <div class="ch">
   <div class="ch-head">
     <div class="ch-icon"><svg viewBox="0 0 24 24"><path d="M5.46257 4.43262C7.21556 2.91688 9.5007 2 12 2C17.5228 2 22 6.47715 22 12C22 14.1361 21.3302 16.1158 20.1892 17.7406L17 12H20C20 7.58172 16.4183 4 12 4C9.84982 4 7.89777 4.84827 6.46023 6.23815L5.46257 4.43262ZM18.5374 19.5674C16.7844 21.0831 14.4993 22 12 22C6.47715 22 2 17.5228 2 12C2 9.86386 2.66979 7.88416 3.81078 6.25944L7 12H4C4 16.4183 7.58172 20 12 20C14.1502 20 16.1022 19.1517 17.5398 17.7619L18.5374 19.5674Z"/></svg></div>
-    <div class="ch-title">自动更新检测 <span class="app-tag">仅 App</span></div>
+    <div class="ch-title">检查软件更新 <span class="app-tag">仅 App</span></div>
   </div>
   <div class="ch-body">
-    <p>App 每次启动时会联网检查新版本。如果有壳（原生层）更新，会弹窗提示下载。</p>
+    <p>App 内置完整界面，首次启动和日常记笔记均可离线使用。需要更新时，在设置里点「检查软件更新」联网检查。</p>
     <ul>
-      <li>弹窗会明确显示文件名（如 <code>copie-1.6.apk</code>），按名安装，避免装成下载夹里的旧包</li>
-      <li>只有 App 壳本身有功能更新时才需要重装；普通界面升级刷新即生效，无需任何操作</li>
+      <li>下载链接会明确显示文件名（如 <code>copie-1.90.apk</code>），按名安装，避免装成下载夹里的旧包</li>
+      <li>App 界面和原生功能一起随 APK 更新，覆盖安装即可；浏览器版仍可自动刷新更新</li>
     </ul>
   </div>
 </div>

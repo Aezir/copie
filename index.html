@@ -802,7 +802,8 @@ const ICONS={expandUpDown:'M18 9 12 3 6 9H18ZM18 15 12 21 6 15H18Z',
 };
 const ic=(n)=>`<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n]}"/></svg>`;
 
-const APP_VERSION='1.98';
+const APP_VERSION='1.99';
+const BUNDLED_APP=!!(window.AndroidBridge&&AndroidBridge.isBundledApp&&AndroidBridge.isBundledApp());
 const DB_NAME='copybox', STORE='entries', BK_STORE='backups', DB_VER=2;
 let db;
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,DB_VER);
@@ -1591,7 +1592,7 @@ $('#settingsBtn').onclick=()=>{ $('#aboutBox').innerHTML=`<div class="about-card
   <div class="a-row">版本更新请点「关于」标题旁的图标查看；云同步怎么配、原理是什么，点「云同步」标题旁的 <b>?</b> 看教程。</div>
   <div class="a-row">这是开发者兴趣使然的作品。严禁任何与此作品相关的商业化行为。</div>
   <div class="a-row">本应用不收集任何数据：无统计、无埋点、无上报。你的数据只存在本机浏览器；云同步（若你启用）也只进你自己的私有仓库。</div>
-  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.75/copie-1.75.apk" target="_blank">
+  <a class="a-dl" id="aboutDlCard" href="https://github.com/Aezir/copie/releases/download/v1.90/copie-1.90.apk" target="_blank">
     <div class="a-dl-icon"><svg viewBox="0 0 24 24"><path d="M4 19H20V12H22V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V12H4V19ZM13 9V16H11V9H6L12 3L18 9H13Z"/></svg></div>
     <div class="a-dl-info"><div class="a-dl-name">下载 Android App</div><div class="a-dl-ver" id="aboutDlVer">Copie v${APP_VERSION}</div></div>
     <div class="a-dl-arr"><svg viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></div>
@@ -1949,6 +1950,11 @@ $('#snapList').addEventListener('click',async e=>{ const b=e.target.closest('.sn
 
 /* ---------- 更新日志（每次发版在最前面加一条） ---------- */
 const CHANGELOG=[
+  {v:'1.99', d:'2026-11-20', items:[
+    '新建笔记未输入时可点空白处退出；已有输入时保留草稿，清空后可再次点空白处退出',
+    'Android 1.90 内置完整界面，首次启动和悬浮面板均可离线使用；本地笔记无需联网',
+    'App 内的界面随 APK 更新；云同步与手动检查更新仍可在联网时使用',
+  ]},
   {v:'1.85', d:'2026-09-14', items:[
     '修复坚果云首次同步报 HTTP 409：云端还没有 Copie 文件夹时，现在会自动新建并上传',
   ]},
@@ -2040,11 +2046,13 @@ function cmpVer(a,b){ const pa=String(a||'0').split('.').map(x=>parseInt(x,10)||
 async function hardReload(){ try{ if('serviceWorker' in navigator){ for(const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); }
   if(window.caches){ for(const k of await caches.keys()) await caches.delete(k); } }catch(_){} location.reload(); }
 async function checkUpdate(){ toast('检查中…'); let v;
-  try{ const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); v=await r.json(); }
+  try{ const url=BUNDLED_APP?'https://raw.githubusercontent.com/Aezir/copie/main/version.json':'version.json';
+    const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); v=await r.json(); }
   catch(_){ toast('检查失败：拿不到版本信息（需联网）'); return; }
   const webV=v.web||v.versionName, apkV=v.versionName; let shellV=null;
   try{ if(window.AndroidBridge&&AndroidBridge.getVersionName) shellV=String(AndroidBridge.getVersionName()); }catch(_){}
   if(shellV && cmpVer(apkV,shellV)>0){ if(confirm('壳 App 有新版本 v'+apkV+'（当前 v'+shellV+'），去下载安装？')){ try{ if(AndroidBridge.openUrl){ AndroidBridge.openUrl(v.apk); return; } }catch(_){} window.open(v.apk,'_blank'); } return; }
+  if(BUNDLED_APP&&cmpVer(webV,APP_VERSION)>0){ toast('界面更新随新版 APK 提供，请下载新版 App'); return; }
   if(cmpVer(webV,APP_VERSION)>0){ if(confirm('有新版本 v'+webV+'（当前 v'+APP_VERSION+'），现在刷新更新？本机数据不受影响。')) await hardReload(); return; }
   toast('已是最新（v'+APP_VERSION+(shellV?'，壳 v'+shellV:'')+'）'); }
 $('#updateItem').onclick=checkUpdate;
@@ -2085,7 +2093,12 @@ $('#undoBarBtn').onclick=async()=>{ if(!pendingUndo||$('#undoBar')._dragged) ret
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;}
 $('#searchInp').addEventListener('input',e=>{keyword=e.target.value; render();});
-$('#editMask').addEventListener('click',e=>{if(e.target.id==='editMask') e.currentTarget.classList.remove('show');});
+$('#editMask').addEventListener('click',e=>{
+  if(e.target!==e.currentTarget) return;
+  // 新建笔记有任何输入时，点击遮罩不丢弃草稿；清空后仍可点空白处退出。
+  if(!editingId&&[...e.currentTarget.querySelectorAll('input,textarea')].some(field=>field.value.length>0)) return;
+  e.currentTarget.classList.remove('show');
+});
 $('#tagMask').addEventListener('click',e=>{if(e.target.id==='tagMask') e.currentTarget.classList.remove('show');});
 
 /* ---------- 壳 App 联动：外部改动后重读本地库刷新 + 设置页悬浮球开关 ---------- */
@@ -2192,7 +2205,11 @@ render();
 }catch(err){ console.error(err); toast('本地存储打不开，请用浏览器打开本文件'); } })();
 
 /* PWA：注册 Service Worker（仅在 http/https 下生效，file:// 本地打开会自动跳过） */
-if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+if(BUNDLED_APP&&'serviceWorker' in navigator){
+  // 保留同源 IndexedDB/localStorage，只注销旧线上缓存的接管；安装包的界面始终以包内版本为准。
+  navigator.serviceWorker.getRegistrations().then(regs=>Promise.all(regs.map(r=>r.unregister()))).catch(()=>{});
+}
+if(!BUNDLED_APP && 'serviceWorker' in navigator && location.protocol.startsWith('http')){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
   /* SW 后台拉到新版会发消息过来：没在操作就直接刷新（缓存已是新版，秒开）；正忙就记着，空下来再刷 */
   const copieIdle=()=>{ if(document.hidden) return false; if(typeof openSwipe!=='undefined'&&openSwipe) return false; if(typeof selMode!=='undefined'&&selMode) return false;

@@ -13,7 +13,7 @@
 
 ## 三、仓库与托管
 - **GitHub**：`Aezir/copie`（**公开**——为免费版 Netlify CI 放行而公开；代码无密钥，用户数据在另一个私有仓 `copie-data` 和本机浏览器里）。本项目就是仓库根目录（`copie/` 文件夹 = git 仓库根）。提交邮箱固定用 GitHub noreply（`109808984+Aezir@users.noreply.github.com`），别改回私人邮箱（历史已为隐私改写过一次）。
-- **本地路径**：`D:\projtects\copie\`（2026-09-07 重新克隆；旧路径 `D:\Documents\DailyResearch\copie\` 已弃）。**唯一源文件是 `index.html`**（旧的 copybox.html 已并入并删除）。
+- **本地路径**：网页仓库 `D:\projects\copie\`；Android 原生壳仓库 `D:\projects\copie-bubble\`（2026-11-20 从 `D:\Documents\DailyResearch\` 迁移）。**唯一源文件是 `index.html`**（旧的 copybox.html 已并入并删除）。
 - **线上**：https://copwe.netlify.app （Netlify，主站，壳 APK 加载的是这个）；**备用 https://copie-lake.vercel.app**（Vercel，2026-09-07 因 Netlify 免费额度用尽临时部署，发布用 **`bash deploy-vercel.sh`**：它把文件拷到一个没有 .git 的临时目录再发。直接在仓库目录里 `vercel deploy` 会被判 BLOCKED——Vercel 拿 git 提交作者邮箱对账号，noreply 邮箱对不上。缓存头在 vercel.json，`.vercelignore` 排除了 APK 等）。
 - **部署方式**：已接**持续部署**——`git push` 到 main **自动上线**（Netlify 通过 deploy key 拉私有仓库 + GitHub webhook 触发）。也可手动 `netlify deploy --prod`（CLI 已登录，目录已关联站点；`.netlify/` 被 `.gitignore` 忽略）。
 - **Netlify 徽标**（"Powered by Netlify"）：在 Netlify 面板 **Project configuration → General → Powered by Netlify badge** 关掉（按项目、免费版可关，无 CLI/toml 办法）。
@@ -68,7 +68,7 @@
 ## 九、改代码/验证流程
 - 直接编辑 `index.html`。改完用这条给内联脚本做语法体检：
   ```
-  cd "D:/projtects/copie"
+  cd "D:/projects/copie"
   node -e "const h=require('fs').readFileSync('index.html','utf8');const m=h.match(/<script>([\s\S]*?)<\/script>/);require('fs').writeFileSync(process.env.TEMP+'/c.js',m[1]);" && node --check "$TEMP/c.js"
   ```
 - 预览窗口是**静态快照**，跑不了 IndexedDB/手势/同步——真要验证让用户在浏览器/线上点，或部署后测。
@@ -79,3 +79,9 @@
 - 壳 App（MainActivity）可补 `AndroidBridge.getVersionName()` / `openUrl(url)`：网页「检查软件更新」会用它们判断壳版本、跳转 APK 下载；没有也能用（只查网页版本）。
 - `version.json` 的 `web` 字段 = 网页版本（给「检查更新」用），`versionName` = 壳 APK 版本，两者独立。
 - App 图标可再打磨。
+
+## 2026-11-20：APK 离线内置版本
+- 网页 1.99 / APK 1.90：新建笔记有输入时点遮罩不退出。
+- Android 主界面、悬浮面板与教程改为读取 APK 内置资源；保持旧 HTTPS origin，沿用原有 IndexedDB/localStorage。
+- APK 不再从线上自动刷新界面，也不在启动时检查版本；联网功能由云同步配置或手动检查更新触发。
+- 修改网页后，发 APK 前在 `D:\projects\copie-bubble` 运行 `powershell -File ./sync-web-assets.ps1`，构建并提交 `app/src/main/assets/web` 快照；网页源码仍以本仓为准。
